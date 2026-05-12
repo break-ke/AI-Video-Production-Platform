@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(curl *)",
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --no-import-alias --use-npm)",
+      "Bash(npm init *)",
+      "Bash(npm install *)",
+      "Bash(npx next *)",
+      "Bash(grep -o 'STATUS_MAP\\\\[[^]]*\\\\]' .next/server/chunks/ssr/app_feedback_page_tsx_0lik-oh._.js)",
+      "Bash(ls .next/server/chunks/ssr/app_feedback*)",
+      "Bash(node -e ' *)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git config *)"
+    ]
+  }
+}

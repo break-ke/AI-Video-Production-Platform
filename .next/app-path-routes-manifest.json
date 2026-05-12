@@ -1,0 +1,12 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/auto-editing/page": "/auto-editing",
+  "/competitive-research/page": "/competitive-research",
+  "/feedback/page": "/feedback",
+  "/model-adaptation/page": "/model-adaptation",
+  "/one-click-replicate/page": "/one-click-replicate",
+  "/page": "/",
+  "/script-iteration/page": "/script-iteration",
+  "/storyboard/page": "/storyboard"
+}
