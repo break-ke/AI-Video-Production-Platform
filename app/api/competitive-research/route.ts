@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { competitiveResearch } from "@/lib/store";
-import { analyzeCompetitor } from "@/lib/analyzer";
+import { analyzeCompetitorDeep } from "@/lib/analyzer";
+import type { CompetitiveResearch } from "@/types";
 
 export async function GET() {
   const data = competitiveResearch.getAll();
@@ -19,24 +20,32 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const analysis = await analyzeCompetitor(url);
+    const analysis = await analyzeCompetitorDeep(url);
 
     const id = `CR-${Date.now().toString(36).toUpperCase()}`;
     const now = new Date().toISOString();
 
-    const item = {
+    const totalViralViews = analysis.viralVideos.reduce((s, v) => s + v.views, 0);
+    const totalViralLikes = analysis.viralVideos.reduce((s, v) => s + v.likes, 0);
+
+    const item: CompetitiveResearch = {
       id,
       keyword: analysis.keyword,
       industry: analysis.industry,
       competitorLink: url,
       competitorName: analysis.competitorName,
-      sellingPoints: analysis.sellingPoints,
+      sellingPointsAnalysis: analysis.sellingPointsAnalysis,
+      hotKeywords: analysis.hotKeywords,
+      viralVideos: analysis.viralVideos,
+      structureSummary: analysis.structureSummary,
+      scriptOptimization: analysis.scriptOptimization,
       conclusion: analysis.conclusion,
-      likes: Math.floor(Math.random() * 15000) + 500,
-      views: Math.floor(Math.random() * 300000) + 10000,
-      favorites: Math.floor(Math.random() * 10000) + 500,
-      shares: Math.floor(Math.random() * 5000) + 200,
-      creator: "AI分析",
+      sellingPoints: analysis.hotKeywords.join("、"),
+      likes: totalViralLikes,
+      views: totalViralViews,
+      favorites: Math.floor(totalViralLikes * 0.4),
+      shares: Math.floor(totalViralLikes * 0.15),
+      creator: "AI深度分析",
       createdAt: now,
     };
 

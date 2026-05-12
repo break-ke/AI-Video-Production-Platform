@@ -2,3 +2,38 @@
 {"timestamp":"00:00:05.049","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
 {"timestamp":"00:00:12.839","source":"Server","level":"ERROR","message":"Image generation failed, using placeholder: Error: No task_id returned"}
 {"timestamp":"00:03:54.451","source":"Server","level":"LOG","message":"✓ Compiled in 606ms"}
+{"timestamp":"00:06:13.566","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:06:21.711","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:06:41.197","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:07:31.182","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:07:31.182","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:07:31.208","source":"Server","level":"WARN","message":"[browser] \"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.\""}
+{"timestamp":"00:07:31.209","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:07:31.222","source":"Server","level":"WARN","message":"[browser] \"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.\""}
+{"timestamp":"00:07:31.222","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:07:44.843","source":"Server","level":"WARN","message":"[browser] \"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.\""}
+{"timestamp":"00:07:44.843","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:07:44.844","source":"Server","level":"WARN","message":"[browser] \"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.\""}
+{"timestamp":"00:07:44.844","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:07:44.845","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:07:44.845","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:11:08.146","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:11:08.146","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:11:08.147","source":"Server","level":"WARN","message":"[browser] \"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.\""}
+{"timestamp":"00:11:08.148","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:11:08.149","source":"Server","level":"WARN","message":"[browser] \"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.\""}
+{"timestamp":"00:11:08.149","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:12:39.508","source":"Server","level":"WARN","message":"[browser] \"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.\""}
+{"timestamp":"00:12:39.508","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:12:39.509","source":"Server","level":"WARN","message":"[browser] \"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.\""}
+{"timestamp":"00:12:39.509","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:12:39.509","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:12:39.510","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:27:08.669","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:27:08.669","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:27:08.670","source":"Server","level":"WARN","message":"[browser] \"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.\""}
+{"timestamp":"00:27:08.672","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:27:08.673","source":"Server","level":"WARN","message":"[browser] \"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.\""}
+{"timestamp":"00:27:08.674","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:36:17.713","source":"Server","level":"LOG","message":"✓ Compiled in 1067ms"}
+{"timestamp":"00:37:21.509","source":"Server","level":"LOG","message":"✓ Compiled in 356ms"}

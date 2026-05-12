@@ -1,5 +1,8 @@
 {
+  "/api/competitive-research/route": "app/api/competitive-research/route.js",
   "/api/lingke/test/route": "app/api/lingke/test/route.js",
   "/api/storyboard/route": "app/api/storyboard/route.js",
-  "/page": "app/page.js"
+  "/competitive-research/page": "app/competitive-research/page.js",
+  "/page": "app/page.js",
+  "/storyboard/page": "app/storyboard/page.js"
 }

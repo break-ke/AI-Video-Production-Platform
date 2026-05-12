@@ -30,7 +30,8 @@
       "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\);const j=JSON.parse\\(d\\);console.log\\('Count:',j.data.length,'IDs:',j.data.map\\(r=>r.id\\).join\\(', '\\)\\)\")",
       "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\);const j=JSON.parse\\(d\\);console.log\\('New:',j.data.id,j.data.competitorName,j.data.keyword\\)\")",
       "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\);const j=JSON.parse\\(d\\);console.log\\('Count:',j.data.length\\)\")",
-      "Bash(taskkill /F /IM \"node.exe\")"
+      "Bash(taskkill /F /IM \"node.exe\")",
+      "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" npx next build)"
     ]
   }
 }
