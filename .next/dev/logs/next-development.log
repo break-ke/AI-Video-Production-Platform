@@ -1,1 +1,4 @@
-{"timestamp":"00:00:02.214","source":"Server","level":"LOG","message":""}
+{"timestamp":"00:00:02.764","source":"Server","level":"LOG","message":""}
+{"timestamp":"00:00:05.049","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:00:12.839","source":"Server","level":"ERROR","message":"Image generation failed, using placeholder: Error: No task_id returned"}
+{"timestamp":"00:03:54.451","source":"Server","level":"LOG","message":"✓ Compiled in 606ms"}

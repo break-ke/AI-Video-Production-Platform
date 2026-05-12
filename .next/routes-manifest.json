@@ -42,6 +42,30 @@
       "namedRegex": "^/_not\\-found(?:/)?$"
     },
     {
+      "page": "/api/competitive-research",
+      "regex": "^/api/competitive\\-research(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/competitive\\-research(?:/)?$"
+    },
+    {
+      "page": "/api/feishu/test",
+      "regex": "^/api/feishu/test(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/feishu/test(?:/)?$"
+    },
+    {
+      "page": "/api/lingke/test",
+      "regex": "^/api/lingke/test(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/lingke/test(?:/)?$"
+    },
+    {
+      "page": "/api/storyboard",
+      "regex": "^/api/storyboard(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/storyboard(?:/)?$"
+    },
+    {
       "page": "/auto-editing",
       "regex": "^/auto\\-editing(?:/)?$",
       "routeKeys": {},

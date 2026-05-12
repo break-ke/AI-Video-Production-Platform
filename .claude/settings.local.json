@@ -14,7 +14,23 @@
       "Bash(git init *)",
       "Bash(git add *)",
       "Bash(git commit *)",
-      "Bash(git config *)"
+      "Bash(git config *)",
+      "Bash(npx vercel *)",
+      "Bash(gh --version)",
+      "Bash(winget install *)",
+      "Bash(git remote *)",
+      "Bash(git push *)",
+      "Bash(git rm *)",
+      "Bash(ssh-keygen *)",
+      "Bash(ssh -T -o StrictHostKeyChecking=no git@github.com)",
+      "WebFetch(domain:skills.sh)",
+      "Bash(npx skills *)",
+      "WebFetch(domain:jimeng.jianying.com)",
+      "Bash(npx tsx -e ' *)",
+      "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\);const j=JSON.parse\\(d\\);console.log\\('Count:',j.data.length,'IDs:',j.data.map\\(r=>r.id\\).join\\(', '\\)\\)\")",
+      "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\);const j=JSON.parse\\(d\\);console.log\\('New:',j.data.id,j.data.competitorName,j.data.keyword\\)\")",
+      "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\);const j=JSON.parse\\(d\\);console.log\\('Count:',j.data.length\\)\")",
+      "Bash(taskkill /F /IM \"node.exe\")"
     ]
   }
 }

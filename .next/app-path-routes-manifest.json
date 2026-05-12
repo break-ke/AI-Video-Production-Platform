@@ -1,6 +1,10 @@
 {
   "/_global-error/page": "/_global-error",
   "/_not-found/page": "/_not-found",
+  "/api/competitive-research/route": "/api/competitive-research",
+  "/api/feishu/test/route": "/api/feishu/test",
+  "/api/lingke/test/route": "/api/lingke/test",
+  "/api/storyboard/route": "/api/storyboard",
   "/auto-editing/page": "/auto-editing",
   "/competitive-research/page": "/competitive-research",
   "/feedback/page": "/feedback",
