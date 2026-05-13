@@ -1,233 +1,196 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { mockEditingTasks } from "@/lib/mock/auto-editing";
-import { STATUS_MAP } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
+import type { EditingTask } from "@/types";
 import {
-  Clapperboard,
-  Play,
-  Download,
-  Eye,
-  Mic,
-  Scissors,
-  Film,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  Loader2,
-  Plus,
+  Clapperboard, Plus, Eye, Trash2, Loader2, Play, Pause, Mic, Film, CheckCircle2, Clock, Video,
 } from "lucide-react";
 
-const stepIcons = [Mic, Scissors, Film, CheckCircle2];
+const stageIcons: Record<string, React.ElementType> = {
+  pending: Clock,
+  dubbing: Mic,
+  editing: Film,
+  compositing: Clapperboard,
+  completed: CheckCircle2,
+  failed: Clock,
+};
 
-const stepLabels = ["配音", "剪辑", "合成", "完成"];
+const stageLabels: Record<string, string> = {
+  pending: "等待中",
+  dubbing: "配音中",
+  editing: "剪辑中",
+  compositing: "合成中",
+  completed: "已完成",
+  failed: "失败",
+};
+
+const stageColors: Record<string, string> = {
+  pending: "bg-gray-200",
+  dubbing: "bg-blue-200",
+  editing: "bg-purple-200",
+  compositing: "bg-indigo-200",
+  completed: "bg-emerald-200",
+  failed: "bg-red-200",
+};
+
+const stages = ["pending", "dubbing", "editing", "compositing", "completed"];
 
 export default function AutoEditingPage() {
-  const [data, setData] = useState(mockEditingTasks);
-  const [selected, setSelected] = useState<(typeof data)[0] | null>(null);
+  const [data, setData] = useState<EditingTask[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<EditingTask | null>(null);
   const [showDetail, setShowDetail] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
+  const [newScriptId, setNewScriptId] = useState("");
+  const [newScriptContent, setNewScriptContent] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const activeCount = data.filter((t) => t.status !== "completed" && t.status !== "failed").length;
-  const completedCount = data.filter((t) => t.status === "completed").length;
-  const failedCount = data.filter((t) => t.status === "failed").length;
+  const fetchData = useCallback(async () => {
+    try { const res = await fetch("/api/auto-editing"); const json = await res.json(); if (json.success) setData(json.data); }
+    finally { setLoading(false); }
+  }, []);
+  useEffect(() => { fetchData(); const i = setInterval(fetchData, 5000); return () => clearInterval(i); }, [fetchData]);
+
+  const handleStart = async () => {
+    if (!newScriptId) return;
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/auto-editing", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scriptId: newScriptId, scriptContent: newScriptContent || undefined }),
+      });
+      const json = await res.json();
+      if (json.success) { setData([json.data, ...data]); setShowAdd(false); setNewScriptId(""); setNewScriptContent(""); }
+    } finally { setSubmitting(false); }
+  };
+
+  const handleDelete = async (id: string) => {
+    await fetch(`/api/auto-editing?id=${id}`, { method: "DELETE" });
+    setData(data.filter((d) => d.id !== id));
+  };
+
+  const completed = data.filter((d) => d.status === "completed").length;
+  const inProgress = data.filter((d) => d.status !== "completed" && d.status !== "failed").length;
 
   return (
     <div className="space-y-6 max-w-7xl">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold">自动剪辑与配音</h2>
-          <p className="text-sm text-[var(--color-muted-foreground)]">
-            基于脚本自动生成配音、剪辑方案并合成视频成片
-          </p>
-        </div>
-        <Button className="gap-2">
-          <Plus className="size-4" />
-          新建剪辑任务
-        </Button>
+        <div><h2 className="text-lg font-semibold">自动剪辑配音</h2><p className="text-sm text-[var(--color-muted-foreground)]">AI自动解析脚本→配音→剪辑→合成，全流程自动化</p></div>
+        <Button onClick={() => setShowAdd(true)} className="gap-2"><Plus className="size-4" />新建剪辑任务</Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: "总任务", value: data.length, icon: Clapperboard, color: "text-indigo-600", bg: "bg-indigo-100" },
-          { label: "进行中", value: activeCount, icon: Loader2, color: "text-blue-600", bg: "bg-blue-100" },
-          { label: "已完成", value: completedCount, icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-100" },
-          { label: "失败", value: failedCount, icon: AlertCircle, color: "text-red-600", bg: "bg-red-100" },
+          { label: "总任务", value: data.length, icon: Clapperboard },
+          { label: "进行中", value: inProgress, icon: Play },
+          { label: "已完成", value: completed, icon: CheckCircle2 },
+          { label: "失败", value: data.filter((d) => d.status === "failed").length, icon: Pause },
         ].map((s) => (
-          <Card key={s.label}>
-            <CardContent className="p-3">
-              <div className="flex items-center gap-3">
-                <div className={`size-9 rounded-lg ${s.bg} flex items-center justify-center`}>
-                  <s.icon className={`size-4 ${s.color}`} />
-                </div>
-                <div>
-                  <p className="text-lg font-bold">{s.value}</p>
-                  <p className="text-xs text-[var(--color-muted-foreground)]">{s.label}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <Card key={s.label}><CardContent className="p-3"><div className="flex items-center gap-3">
+            <div className="size-9 rounded-lg bg-[var(--color-muted)] flex items-center justify-center"><s.icon className="size-4" /></div>
+            <div><p className="text-lg font-bold">{s.value}</p><p className="text-xs text-[var(--color-muted-foreground)]">{s.label}</p></div>
+          </div></CardContent></Card>
         ))}
       </div>
 
-      {/* Task Cards */}
-      <div className="grid md:grid-cols-2 gap-4">
-        {data.map((task) => {
-          const status = STATUS_MAP[task.status];
-          const stepIndex = task.status === "dubbing" ? 0 : task.status === "editing" ? 1 : task.status === "compositing" ? 2 : task.status === "completed" ? 3 : -1;
-          return (
-            <Card key={task.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => { setSelected(task); setShowDetail(true); }}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-mono font-medium">{task.id}</span>
-                    <Badge className={`text-xs ${status.color}`}>{status.label}</Badge>
-                  </div>
-                  <span className="text-xs text-[var(--color-muted-foreground)]">{task.scriptId}</span>
-                </div>
-
-                {/* Progress Steps */}
-                <div className="flex items-center gap-1 mb-3">
-                  {stepIcons.map((Icon, idx) => {
-                    const isDone = idx < stepIndex;
-                    const isCurrent = idx === stepIndex;
-                    return (
-                      <div key={idx} className="flex items-center flex-1 last:flex-none">
-                        <div className={`size-8 rounded-full flex items-center justify-center ${
-                          isDone ? "bg-emerald-500 text-white" :
-                          isCurrent ? "bg-[var(--color-primary)] text-white" :
-                          "bg-[var(--color-muted)] text-[var(--color-muted-foreground)]"
-                        }`}>
-                          {isCurrent && task.status !== "completed" ? (
-                            <Loader2 className="size-4 animate-spin" />
-                          ) : (
-                            <Icon className="size-4" />
-                          )}
+      <Card><CardContent className="p-0">
+        {loading ? (
+          <div className="flex justify-center py-20"><Loader2 className="size-6 animate-spin" /></div>
+        ) : data.length === 0 ? (
+          <div className="text-center py-16"><Clapperboard className="size-10 text-[var(--color-muted-foreground)] mx-auto mb-3" /><p className="text-sm text-[var(--color-muted-foreground)]">暂无剪辑任务，点击新建开始</p></div>
+        ) : (
+          <div className="overflow-x-auto"><table className="w-full">
+            <thead><tr className="border-b bg-[var(--color-muted)]/50"><th className="text-left p-3 text-xs">ID</th><th className="text-left p-3 text-xs">脚本ID</th><th className="text-left p-3 text-xs">进度</th><th className="text-center p-3 text-xs">状态</th><th className="text-left p-3 text-xs">时间</th><th className="text-center p-3 text-xs">操作</th></tr></thead>
+            <tbody>
+              {data.map((item) => {
+                const StageIcon = stageIcons[item.status] || Clock;
+                return (
+                  <tr key={item.id} className="border-b hover:bg-[var(--color-muted)]/30">
+                    <td className="p-3 text-sm font-mono">{item.id}</td>
+                    <td className="p-3 text-sm">{item.scriptId}</td>
+                    <td className="p-3 w-48">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-2 bg-[var(--color-muted)] rounded-full overflow-hidden">
+                          <div className={`h-full rounded-full transition-all duration-1000 ${item.status === "failed" ? "bg-red-500" : "bg-[var(--color-primary)]"}`} style={{ width: `${item.progress}%` }} />
                         </div>
-                        {idx < stepIcons.length - 1 && (
-                          <div className={`h-0.5 flex-1 mx-1 ${
-                            idx < stepIndex ? "bg-emerald-500" : "bg-[var(--color-border)]"
-                          }`} />
-                        )}
+                        <span className="text-xs font-mono w-10">{item.progress}%</span>
+                      </div>
+                    </td>
+                    <td className="p-3 text-center">
+                      <Badge className={`text-xs flex items-center gap-1 ${stageColors[item.status] || "bg-gray-100"} text-gray-800`}>
+                        <StageIcon className="size-3" />{stageLabels[item.status] || item.status}
+                      </Badge>
+                    </td>
+                    <td className="p-3 text-sm whitespace-nowrap">{formatDate(item.createdAt)}</td>
+                    <td className="p-3"><div className="flex justify-center gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => { setSelected(item); setShowDetail(true); }}><Eye className="size-4" /></Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(item.id)}><Trash2 className="size-4 text-[var(--color-destructive)]" /></Button>
+                    </div></td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table></div>
+        )}
+      </CardContent></Card>
+
+      <Dialog open={showDetail} onOpenChange={setShowDetail}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Clapperboard className="size-5" />任务详情 · {selected?.id}</DialogTitle></DialogHeader>
+          {selected && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-3">
+                <div><p className="text-xs text-[var(--color-muted-foreground)]">脚本ID</p><p className="font-medium">{selected.scriptId}</p></div>
+                <div><p className="text-xs text-[var(--color-muted-foreground)]">进度</p><div className="flex items-center gap-2"><div className="flex-1 h-2 bg-[var(--color-muted)] rounded-full"><div className="h-full bg-[var(--color-primary)] rounded-full" style={{ width: `${selected.progress}%` }} /></div><span className="text-sm font-bold">{selected.progress}%</span></div></div>
+                <div><p className="text-xs text-[var(--color-muted-foreground)]">状态</p><Badge className={(stageColors[selected.status] || "") + " text-gray-800 text-xs"}>{stageLabels[selected.status]}</Badge></div>
+              </div>
+
+              <div>
+                <p className="text-sm font-medium mb-2">剪辑流程</p>
+                <div className="flex items-center gap-1">
+                  {stages.map((s, i) => {
+                    const activeIdx = stages.indexOf(selected.status);
+                    const done = activeIdx > i || (selected.status === "completed" && i === stages.length - 1);
+                    const current = activeIdx === i && selected.status !== "completed";
+                    return (
+                      <div key={s} className="flex items-center flex-1">
+                        <div className={`size-8 rounded-full flex items-center justify-center text-xs font-bold ${done ? "bg-emerald-500 text-white" : current ? "bg-[var(--color-primary)] text-white" : "bg-[var(--color-muted)] text-[var(--color-muted-foreground)]"}`}>
+                          {done ? "✓" : i + 1}
+                        </div>
+                        {i < stages.length - 1 && <div className={`flex-1 h-0.5 mx-1 ${done ? "bg-emerald-300" : "bg-[var(--color-border)]"}`} />}
                       </div>
                     );
                   })}
                 </div>
-
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-[var(--color-muted-foreground)]">进度</span>
-                    <span className="font-medium">{task.progress}%</span>
-                  </div>
-                  <Progress value={task.progress} />
-                </div>
-
-                <div className="flex items-center justify-between mt-3 text-xs text-[var(--color-muted-foreground)]">
-                  <span>{formatDate(task.createdAt)}</span>
-                  <div className="flex gap-1">
-                    {task.status === "completed" && (
-                      <>
-                        <Button variant="ghost" size="sm" className="h-7 gap-1">
-                          <Play className="size-3" /> 预览
-                        </Button>
-                        <Button variant="ghost" size="sm" className="h-7 gap-1">
-                          <Download className="size-3" /> 下载
-                        </Button>
-                      </>
-                    )}
-                    {task.status === "failed" && (
-                      <Button variant="ghost" size="sm" className="h-7 text-[var(--color-destructive)]">
-                        重试
-                      </Button>
-                    )}
-                    {task.status !== "completed" && task.status !== "failed" && (
-                      <span className="flex items-center gap-1">
-                        <Loader2 className="size-3 animate-spin" />
-                        处理中...
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* Detail Dialog */}
-      <Dialog open={showDetail} onOpenChange={setShowDetail}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Clapperboard className="size-5" />
-              剪辑任务详情 · {selected?.id}
-            </DialogTitle>
-          </DialogHeader>
-          {selected && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <p className="text-xs text-[var(--color-muted-foreground)]">脚本ID</p>
-                  <p className="font-medium">{selected.scriptId}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-[var(--color-muted-foreground)]">状态</p>
-                  <Badge className={`mt-1 ${STATUS_MAP[selected.status].color}`}>{STATUS_MAP[selected.status].label}</Badge>
+                <div className="flex items-center justify-between mt-1">
+                  {stages.map((s) => <span key={s} className="text-[10px] text-[var(--color-muted-foreground)]">{stageLabels[s] || s}</span>)}
                 </div>
               </div>
 
-              {/* Progress bar */}
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span>总体进度</span>
-                  <span className="font-medium">{selected.progress}%</span>
-                </div>
-                <Progress value={selected.progress} className="h-3" />
-              </div>
-
-              {selected.editingPlan && (
-                <div>
-                  <p className="text-sm font-medium mb-2">剪辑方案</p>
-                  <div className="bg-[var(--color-muted)] rounded-lg p-3 text-sm whitespace-pre-wrap">{selected.editingPlan}</div>
-                </div>
-              )}
-
-              {selected.dubbingUrl && (
-                <div>
-                  <p className="text-sm font-medium mb-2 flex items-center gap-2">
-                    <Mic className="size-4" />
-                    配音文件
-                  </p>
-                  <div className="bg-[var(--color-muted)] rounded-lg p-3 text-sm flex items-center justify-between">
-                    <span className="font-mono text-xs">{selected.dubbingUrl}</span>
-                    <Button variant="ghost" size="sm"><Play className="size-4" /></Button>
-                  </div>
-                </div>
-              )}
-
-              {selected.outputUrl && (
-                <div>
-                  <p className="text-sm font-medium mb-2 flex items-center gap-2">
-                    <Film className="size-4" />
-                    成片链接
-                  </p>
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-sm flex items-center justify-between">
-                    <span className="font-mono text-xs">{selected.outputUrl}</span>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="sm"><Play className="size-4" /></Button>
-                      <Button variant="ghost" size="sm"><Download className="size-4" /></Button>
-                    </div>
-                  </div>
-                </div>
-              )}
+              <div><p className="text-sm font-medium mb-2">剪辑方案</p><div className="bg-[var(--color-muted)] rounded-lg p-3 text-sm whitespace-pre-wrap">{selected.editingPlan}</div></div>
+              {selected.outputUrl && <div><p className="text-sm font-medium mb-2">成片输出</p><div className="bg-emerald-50 rounded-lg p-3 text-sm text-emerald-700 flex items-center gap-2"><Video className="size-4" />{selected.outputUrl}</div></div>}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showAdd} onOpenChange={setShowAdd}>
+        <DialogContent>
+          <DialogHeader><DialogTitle><Clapperboard className="size-5 inline mr-2" />新建剪辑任务</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div><label className="text-sm font-medium">脚本ID</label><Input placeholder="如 SV-MP2XXXX 或 SCRIPT-001" value={newScriptId} onChange={(e) => setNewScriptId(e.target.value)} /></div>
+            <div><label className="text-sm font-medium">脚本内容（可选）</label><textarea className="w-full h-32 rounded-md border px-3 py-2 text-sm resize-none bg-[var(--color-background)]" placeholder="粘贴脚本内容，AI自动拆解分镜并生成剪辑方案..." value={newScriptContent} onChange={(e) => setNewScriptContent(e.target.value)} /></div>
+          </div>
+          <div className="flex justify-end gap-2 mt-2">
+            <Button variant="outline" onClick={() => setShowAdd(false)}>取消</Button>
+            <Button onClick={handleStart} disabled={submitting || !newScriptId}>{submitting ? <Loader2 className="size-4 animate-spin mr-2" /> : <Play className="size-4 mr-2" />}{submitting ? "启动中..." : "启动剪辑流水线"}</Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

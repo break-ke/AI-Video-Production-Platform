@@ -119,6 +119,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../../app/api/auto-editing/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/auto-editing">> = Specific
+  const handler = {} as typeof import("../../../app/api/auto-editing/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../../app/api/competitive-research/route.ts
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/competitive-research">> = Specific
@@ -159,6 +168,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/model-adaptation">> = Specific
   const handler = {} as typeof import("../../../app/api/model-adaptation/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../../app/api/one-click-replicate/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/one-click-replicate">> = Specific
+  const handler = {} as typeof import("../../../app/api/one-click-replicate/route.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check

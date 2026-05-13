@@ -42,6 +42,12 @@
       "namedRegex": "^/_not\\-found(?:/)?$"
     },
     {
+      "page": "/api/auto-editing",
+      "regex": "^/api/auto\\-editing(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/auto\\-editing(?:/)?$"
+    },
+    {
       "page": "/api/competitive-research",
       "regex": "^/api/competitive\\-research(?:/)?$",
       "routeKeys": {},
@@ -70,6 +76,12 @@
       "regex": "^/api/model\\-adaptation(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/model\\-adaptation(?:/)?$"
+    },
+    {
+      "page": "/api/one-click-replicate",
+      "regex": "^/api/one\\-click\\-replicate(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/one\\-click\\-replicate(?:/)?$"
     },
     {
       "page": "/api/script-iteration",

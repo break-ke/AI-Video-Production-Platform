@@ -1,11 +1,13 @@
 {
   "/_global-error/page": "app/_global-error/page.js",
   "/_not-found/page": "app/_not-found/page.js",
+  "/api/auto-editing/route": "app/api/auto-editing/route.js",
   "/api/competitive-research/route": "app/api/competitive-research/route.js",
   "/api/feedback/route": "app/api/feedback/route.js",
   "/api/feishu/test/route": "app/api/feishu/test/route.js",
   "/api/lingke/test/route": "app/api/lingke/test/route.js",
   "/api/model-adaptation/route": "app/api/model-adaptation/route.js",
+  "/api/one-click-replicate/route": "app/api/one-click-replicate/route.js",
   "/api/script-iteration/route": "app/api/script-iteration/route.js",
   "/api/storyboard/route": "app/api/storyboard/route.js",
   "/auto-editing/page": "app/auto-editing/page.js",
