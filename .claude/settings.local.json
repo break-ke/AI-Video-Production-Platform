@@ -31,7 +31,9 @@
       "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\);const j=JSON.parse\\(d\\);console.log\\('New:',j.data.id,j.data.competitorName,j.data.keyword\\)\")",
       "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\);const j=JSON.parse\\(d\\);console.log\\('Count:',j.data.length\\)\")",
       "Bash(taskkill /F /IM \"node.exe\")",
-      "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" npx next build)"
+      "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" npx next build)",
+      "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" npx next dev -p 3000)",
+      "Bash(node -p \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\)\\); 'OK: '+d.data.id+' | '+d.data.competitorName+' | Videos: '+\\(d.data.viralVideos?.length||0\\)+' | Shots: '+\\(d.data.viralVideos?.[0]?.shots?.length||0\\)\")"
     ]
   }
 }

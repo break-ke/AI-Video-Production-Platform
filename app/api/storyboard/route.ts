@@ -21,9 +21,9 @@ export async function POST(req: NextRequest) {
     let imageUrl = "";
     try {
       imageUrl = await generateImage(
-        "doubao-seedream-5-0-260128",
+        "gpt-image-2",
         prompt,
-        { aspect_ratio: "16:9", size: "2K" }
+        { size: "1024x1536", quality: "standard" }
       );
     } catch (genErr) {
       console.error("Image generation failed, using placeholder:", genErr);
