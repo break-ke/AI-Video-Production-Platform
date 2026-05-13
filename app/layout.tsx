@@ -15,9 +15,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen bg-[var(--color-background)] antialiased">
         <ToastProvider>
           <Sidebar />
-          <div className="pl-60 transition-all duration-300">
+          <div className="pl-[220px] transition-all duration-200">
             <Header />
-            <main className="p-6">{children}</main>
+            <main className="p-6 max-w-[1600px] mx-auto">{children}</main>
           </div>
         </ToastProvider>
       </body>

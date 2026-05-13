@@ -1,41 +1,57 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #ffffff;
-  --color-foreground: #0a0a0a;
+  --color-background: #fafafa;
+  --color-foreground: #18181b;
   --color-card: #ffffff;
-  --color-card-foreground: #0a0a0a;
-  --color-primary: #6366f1;
+  --color-card-foreground: #18181b;
+  --color-primary: #5b57d1;
   --color-primary-foreground: #ffffff;
   --color-secondary: #f4f4f5;
-  --color-secondary-foreground: #18181b;
-  --color-muted: #f4f4f5;
+  --color-secondary-foreground: #27272a;
+  --color-muted: #f5f5f4;
   --color-muted-foreground: #71717a;
   --color-accent: #f0fdf4;
   --color-accent-foreground: #166534;
   --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
-  --color-border: #e4e4e7;
-  --color-input: #e4e4e7;
-  --color-ring: #6366f1;
-  --color-sidebar: #1e1b4b;
-  --color-sidebar-foreground: #e0e0f8;
-  --color-sidebar-accent: #312e81;
+  --color-border: #e8e8ec;
+  --color-input: #e8e8ec;
+  --color-ring: #5b57d1;
+  --color-sidebar: #171717;
+  --color-sidebar-foreground: #a1a1aa;
+  --color-sidebar-accent: #27272a;
   --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-info: #3b82f6;
-  --radius-sm: 0.25rem;
+  --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
 @layer base {
-  * {
-    border-color: var(--color-border);
-  }
+  * { border-color: var(--color-border); }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
+  }
+  h1, h2, h3 { letter-spacing: -0.02em; }
+}
+
+@layer utilities {
+  .shadow-card {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+  }
+  .shadow-card-hover {
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+  }
+  .ring-subtle {
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04);
   }
 }
