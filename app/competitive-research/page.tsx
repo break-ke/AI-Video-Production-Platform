@@ -233,29 +233,34 @@ export default function CompetitiveResearchPage() {
                 </CardContent></Card>
               )}
 
-              {/* Embedded competitor page + video */}
+              {/* Video / Source preview */}
               <div className="grid grid-cols-1 gap-3">
                 {(videoUrl || sel.competitorLink) && (
                   <Card className="shadow-card overflow-hidden">
                     <CardContent className="p-0">
-                      <div className="bg-black aspect-video flex items-center justify-center">
-                        {videoUrl ? (
-                          <video src={videoUrl} controls className="w-full h-full" preload="metadata">
-                            您的浏览器不支持视频播放
-                          </video>
-                        ) : (
-                          <iframe src={sel.competitorLink} className="w-full h-full border-0" sandbox="allow-same-origin allow-scripts" title="竞品页面" loading="lazy" />
-                        )}
-                      </div>
+                      {videoUrl ? (
+                        <video src={videoUrl} controls className="w-full aspect-video" preload="metadata" />
+                      ) : (
+                        <div className="relative aspect-video bg-gradient-to-br from-zinc-900 to-zinc-800 flex items-center justify-center">
+                          <div className="text-center">
+                            <Globe className="size-10 text-zinc-500 mx-auto mb-3" />
+                            <p className="text-zinc-400 text-sm mb-2">{sel.competitorName}</p>
+                            <a href={sel.competitorLink} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 bg-[var(--color-primary)] text-white px-4 py-2 rounded-md text-sm hover:bg-[var(--color-primary)]/90 transition-colors">
+                              <ExternalLink className="size-4" /> 在新窗口打开竞品页面
+                            </a>
+                          </div>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 )}
-                <div className="flex items-center gap-2 text-xs text-zinc-500">
-                  <Globe className="size-3" />
-                  <span>源站：</span>
-                  <a href={sel.competitorLink} target="_blank" rel="noopener" className="text-[var(--color-primary)] hover:underline">{sel.competitorLink}</a>
-                  {sel.basicInfo?.duration && <span className="ml-auto">视频时长：{sel.basicInfo.duration}</span>}
-                </div>
+                {!videoUrl && (
+                  <div className="flex items-center gap-2 text-xs text-zinc-500">
+                    <Globe className="size-3" />
+                    <span>{sel.competitorLink}</span>
+                    {sel.basicInfo?.duration && <span className="ml-auto">视频时长：{sel.basicInfo.duration}</span>}
+                  </div>
+                )}
               </div>
 
               <Tabs defaultValue="shots">
