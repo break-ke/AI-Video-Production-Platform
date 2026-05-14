@@ -81,3 +81,5 @@
 {"timestamp":"40:51:33.971","source":"Server","level":"LOG","message":"[Gemini] Response length: 5251"}
 {"timestamp":"40:51:35.877","source":"Server","level":"LOG","message":"[Gemini] Calling model: \"gemini-3.1-pro-preview\" \"videoUrl:\" \"no\""}
 {"timestamp":"40:52:11.127","source":"Server","level":"LOG","message":"[Gemini] Response length: 5022"}
+{"timestamp":"41:27:27.812","source":"Server","level":"LOG","message":"[Gemini] Calling model: \"gemini-3.1-pro-preview\" \"videoUrl:\" \"no\""}
+{"timestamp":"41:27:59.658","source":"Server","level":"LOG","message":"[Gemini] Response length: 4796"}

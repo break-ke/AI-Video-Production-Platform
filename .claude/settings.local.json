@@ -35,7 +35,8 @@
       "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" npx next dev -p 3000)",
       "Bash(node -p \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\)\\); 'OK: '+d.data.id+' | '+d.data.competitorName+' | Videos: '+\\(d.data.viralVideos?.length||0\\)+' | Shots: '+\\(d.data.viralVideos?.[0]?.shots?.length||0\\)\")",
       "Bash(npx plugins *)",
-      "Bash(vercel deploy *)"
+      "Bash(vercel deploy *)",
+      "Bash(npx tsc *)"
     ]
   }
 }
