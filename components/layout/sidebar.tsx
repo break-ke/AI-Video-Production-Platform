@@ -6,9 +6,7 @@ import { cn } from "@/lib/utils";
 import { NAV_ITEMS } from "@/lib/constants";
 import {
   LayoutDashboard, Search, Film, MessageSquare, FileText, Cpu, Clapperboard, Copy,
-  ChevronLeft, ChevronRight,
 } from "lucide-react";
-import { useState } from "react";
 
 const iconMap: Record<string, React.ElementType> = {
   LayoutDashboard, Search, Film, MessageSquare, FileText, Cpu, Clapperboard, Copy,
@@ -16,25 +14,19 @@ const iconMap: Record<string, React.ElementType> = {
 
 export function Sidebar() {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <aside
-      className={cn(
-        "fixed left-0 top-0 z-40 h-screen bg-[var(--color-sidebar)] flex flex-col transition-all duration-200",
-        collapsed ? "w-[60px]" : "w-[220px]"
-      )}
-    >
-      <div className={cn("flex items-center h-14 px-3", collapsed ? "justify-center" : "gap-2.5")}>
-        <div className="size-7 rounded-md bg-white/10 flex items-center justify-center shrink-0">
-          <Clapperboard className="size-3.5 text-white" strokeWidth={1.5} />
+    <aside className="fixed left-0 top-0 z-40 h-screen w-[210px] bg-white border-r border-[var(--color-border)] flex flex-col">
+      {/* Logo */}
+      <div className="flex items-center gap-2.5 h-14 px-4 border-b border-[var(--color-border)]">
+        <div className="size-7 rounded-lg bg-[var(--color-primary)] flex items-center justify-center shrink-0">
+          <Clapperboard className="size-3.5 text-white" />
         </div>
-        {!collapsed && <span className="font-semibold text-sm text-white tracking-tight">AI视频协同平台</span>}
+        <span className="font-medium text-[15px] text-[var(--color-foreground)] tracking-tight">AI视频协同</span>
       </div>
 
-      <div className="mx-3 h-px bg-white/6" />
-
-      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
+      {/* Nav */}
+      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
         {NAV_ITEMS.map((item) => {
           const Icon = iconMap[item.icon];
           const isActive = pathname === item.href;
@@ -43,27 +35,23 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] transition-colors",
+                "flex items-center gap-3 px-3 py-2.5 rounded-md text-[13px] transition-all duration-150",
                 isActive
-                  ? "bg-white/10 text-white font-medium"
-                  : "text-[var(--color-sidebar-foreground)] hover:text-white hover:bg-white/[0.06]"
+                  ? "bg-[var(--color-sidebar-accent)] text-[var(--color-primary)] font-medium"
+                  : "text-[var(--color-sidebar-foreground)] hover:bg-[var(--color-secondary)] hover:text-[var(--color-foreground)]"
               )}
             >
-              <Icon className="size-4 shrink-0" strokeWidth={1.5} />
-              {!collapsed && <span>{item.label}</span>}
+              <Icon className={cn("size-[18px] shrink-0", isActive ? "text-[var(--color-primary)]" : "text-[var(--color-muted-foreground)]")} />
+              <span>{item.label}</span>
             </Link>
           );
         })}
       </nav>
 
-      <div className="mx-3 h-px bg-white/6" />
-
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="flex items-center justify-center h-9 text-white/30 hover:text-white/60 transition-colors"
-      >
-        {collapsed ? <ChevronRight className="size-3.5" strokeWidth={1.5} /> : <ChevronLeft className="size-3.5" strokeWidth={1.5} />}
-      </button>
+      {/* Footer */}
+      <div className="px-5 py-3 border-t border-[var(--color-border)]">
+        <p className="text-[11px] text-[var(--color-muted-foreground)]">AI Video Platform v1.0</p>
+      </div>
     </aside>
   );
 }

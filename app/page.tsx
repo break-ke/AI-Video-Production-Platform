@@ -1,225 +1,180 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { WorkflowPipeline } from "@/components/layout/workflow-pipeline";
-import { Badge } from "@/components/ui/badge";
+import { useEffect, useState, useCallback } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { mockCompetitiveResearch } from "@/lib/mock/competitive-research";
-import { mockStoryboards } from "@/lib/mock/storyboard";
-import { mockFeedbacks } from "@/lib/mock/feedback";
-import { mockScriptVersions } from "@/lib/mock/script-iteration";
-import { mockModelAdaptations } from "@/lib/mock/model-adaptation";
-import { mockEditingTasks } from "@/lib/mock/auto-editing";
-import { mockTemplates } from "@/lib/mock/one-click-replicate";
-import {
-  Search,
-  Film,
-  FileText,
-  Clapperboard,
-  Copy,
-  ArrowRight,
-  TrendingUp,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { formatDate, formatNumber } from "@/lib/utils";
 import Link from "next/link";
-import { formatDate } from "@/lib/utils";
-import { useMemo } from "react";
+import {
+  Search, Film, FileText, Clapperboard, Copy, ArrowUp, ArrowDown, TrendingUp,
+  ChevronRight, Plus, Eye, Clock, Sparkles, BarChart3,
+} from "lucide-react";
+
+interface Stats {
+  totalResearch: number; totalStoryboards: number; activeEditing: number; completedEditing: number;
+  totalViews: number; feedbackCount: number; templateCount: number; scriptCount: number;
+}
 
 export default function Dashboard() {
-  const stats = useMemo(() => {
-    const activeTasks = mockEditingTasks.filter((t) => t.status !== "completed" && t.status !== "failed").length;
-    const completedTasks = mockEditingTasks.filter((t) => t.status === "completed").length;
-    return {
-      totalResearch: mockCompetitiveResearch.length,
-      totalStoryboards: mockStoryboards.length,
-      activeTasks,
-      completedTasks,
-      templates: mockTemplates.length,
-      totalViews: mockCompetitiveResearch.reduce((s, r) => s + r.views, 0),
-      totalLikes: mockCompetitiveResearch.reduce((s, r) => s + r.likes, 0),
-    };
+  const [stats, setStats] = useState<Stats>({ totalResearch: 0, totalStoryboards: 0, activeEditing: 0, completedEditing: 0, totalViews: 0, feedbackCount: 0, templateCount: 0, scriptCount: 0 });
+  const [recentItems, setRecentItems] = useState<{ id: string; type: string; title: string; time: string; status: string }[]>([]);
+
+  const fetchStats = useCallback(async () => {
+    try {
+      const [cr, sb, fb, sv, et, tp] = await Promise.all([
+        fetch("/api/competitive-research").then(r => r.json()),
+        fetch("/api/storyboard").then(r => r.json()),
+        fetch("/api/feedback").then(r => r.json()),
+        fetch("/api/script-iteration").then(r => r.json()),
+        fetch("/api/auto-editing").then(r => r.json()),
+        fetch("/api/one-click-replicate").then(r => r.json()),
+      ]);
+      const cData = cr.data || []; const sData = sb.data || []; const fData = fb.data || [];
+      const vData = sv.data || []; const eData = et.data || []; const tData = tp.data || [];
+
+      setStats({
+        totalResearch: cData.length, totalStoryboards: sData.length,
+        activeEditing: eData.filter((t: { status: string }) => t.status !== "completed" && t.status !== "failed").length,
+        completedEditing: eData.filter((t: { status: string }) => t.status === "completed").length,
+        totalViews: cData.reduce((s: number, r: { views: number }) => s + (r.views || 0), 0),
+        feedbackCount: fData.length, templateCount: tData.length, scriptCount: vData.length,
+      });
+
+      const all: { id: string; type: string; title: string; time: string; status: string }[] = [];
+      cData.slice(0, 3).forEach((r: { id: string; createdAt: string; competitorName: string; keyword: string }) => all.push({ id: r.id, type: "research", title: `竞品分析 · ${r.competitorName}`, time: r.createdAt, status: r.keyword }));
+      eData.slice(0, 3).forEach((t: { id: string; createdAt: string; scriptId: string; status: string }) => all.push({ id: t.id, type: "editing", title: `剪辑任务 · ${t.scriptId}`, time: t.createdAt, status: t.status }));
+      fData.slice(0, 3).forEach((f: { id: string; createdAt: string; storyboardId: string; type: string }) => all.push({ id: f.id, type: "feedback", title: `用户反馈 · ${f.storyboardId}`, time: f.createdAt, status: f.type }));
+      setRecentItems(all.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()).slice(0, 8));
+    } catch { /* leave defaults */ }
   }, []);
 
-  const recentItems = useMemo(() => {
-    const items = [
-      ...mockCompetitiveResearch.map((r) => ({ ...r, type: "research" as const, date: r.createdAt })),
-      ...mockScriptVersions.map((s) => ({ ...s, type: "script" as const, date: s.createdAt })),
-      ...mockEditingTasks.map((e) => ({ ...e, type: "editing" as const, date: e.createdAt })),
-    ];
-    return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 6);
-  }, []);
+  useEffect(() => { fetchStats(); }, [fetchStats]);
+
+  const kpiCards = [
+    { label: "竞品调研", value: stats.totalResearch, change: "+12%", up: true, icon: Search, color: "#165dff", bg: "#e8f0fe" },
+    { label: "故事板", value: stats.totalStoryboards, change: "+8%", up: true, icon: Film, color: "#00b42a", bg: "#e8f7ed" },
+    { label: "剪辑任务", value: stats.activeEditing, change: stats.completedEditing + "完成", up: true, icon: Clapperboard, color: "#ff7d00", bg: "#fff7e8" },
+    { label: "模板资源", value: stats.templateCount, change: stats.scriptCount + "脚本", up: true, icon: Copy, color: "#722ed1", bg: "#f5e8ff" },
+  ];
 
   return (
-    <div className="space-y-6 max-w-7xl">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-indigo-50 to-white border-indigo-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-[var(--color-muted-foreground)]">竞品调研</p>
-                <p className="text-2xl font-bold">{stats.totalResearch}</p>
-                <p className="text-xs text-[var(--color-muted-foreground)]">{stats.totalViews.toLocaleString()} 总观看</p>
-              </div>
-              <div className="size-10 rounded-lg bg-indigo-100 flex items-center justify-center">
-                <Search className="size-5 text-indigo-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-emerald-50 to-white border-emerald-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-[var(--color-muted-foreground)]">故事板</p>
-                <p className="text-2xl font-bold">{stats.totalStoryboards}</p>
-                <p className="text-xs text-[var(--color-muted-foreground)]">{mockStoryboards.filter((s) => s.status === "confirmed").length} 已确认</p>
-              </div>
-              <div className="size-10 rounded-lg bg-emerald-100 flex items-center justify-center">
-                <Film className="size-5 text-emerald-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-blue-50 to-white border-blue-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-[var(--color-muted-foreground)]">剪辑任务</p>
-                <p className="text-2xl font-bold">{stats.activeTasks}</p>
-                <p className="text-xs text-[var(--color-muted-foreground)]">{stats.completedTasks} 已完成</p>
-              </div>
-              <div className="size-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                <Clapperboard className="size-5 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-purple-50 to-white border-purple-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-[var(--color-muted-foreground)]">模板资源</p>
-                <p className="text-2xl font-bold">{stats.templates}</p>
-                <p className="text-xs text-[var(--color-muted-foreground)]">一键复刻可用</p>
-              </div>
-              <div className="size-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                <Copy className="size-5 text-purple-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+    <div className="space-y-6 max-w-[1440px]">
+      {/* Page Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-medium tracking-tight">数据概览</h1>
+          <p className="text-sm text-[var(--color-muted-foreground)] mt-0.5">AI视频内容生产协同平台 · 飞书生态</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm"><BarChart3 className="size-4 mr-1.5" />导出报表</Button>
+          <Link href="/competitive-research"><Button size="sm"><Plus className="size-4 mr-1.5" />新建调研</Button></Link>
+        </div>
       </div>
 
-      {/* Workflow Pipeline */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base flex items-center gap-2">
-            <TrendingUp className="size-4" />
-            生产流程总览
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <WorkflowPipeline />
-        </CardContent>
-      </Card>
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {kpiCards.map((kpi) => (
+          <Card key={kpi.label} className="shadow-card hover:shadow-card-hover transition-shadow cursor-pointer">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between mb-3">
+                <div className="size-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: kpi.bg }}>
+                  <kpi.icon className="size-5" style={{ color: kpi.color }} />
+                </div>
+                <div className="flex items-center gap-1 text-xs font-medium" style={{ color: kpi.up ? "#00b42a" : "#f53f3f" }}>
+                  {kpi.up ? <ArrowUp className="size-3" /> : <ArrowDown className="size-3" />}
+                  {kpi.change}
+                </div>
+              </div>
+              <p className="text-[28px] font-semibold tracking-tight leading-none mb-1">{kpi.value}</p>
+              <p className="text-sm text-[var(--color-muted-foreground)]">{kpi.label}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Recent Activity */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Clock className="size-4" />
-              最近动态
-            </CardTitle>
-            <Link href="/competitive-research" className="text-xs text-[var(--color-primary)] hover:underline">
-              查看全部
-            </Link>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {recentItems.map((item) => (
-              <div key={item.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-[var(--color-secondary)] transition-colors">
-                <div className="size-8 rounded-lg bg-[var(--color-muted)] flex items-center justify-center shrink-0">
-                  {item.type === "research" && <Search className="size-4" />}
-                  {item.type === "script" && <FileText className="size-4" />}
-                  {item.type === "editing" && <Clapperboard className="size-4" />}
+        <div className="lg:col-span-2">
+          <Card className="shadow-card">
+            <div className="flex items-center justify-between px-5 pt-5 pb-3">
+              <h2 className="text-[15px] font-medium flex items-center gap-2"><Clock className="size-4 text-[var(--color-muted-foreground)]" />最近动态</h2>
+              <Link href="/competitive-research" className="text-xs text-[var(--color-primary)] hover:underline">查看全部 <ChevronRight className="size-3 inline" /></Link>
+            </div>
+            <CardContent className="px-5 pb-5 pt-0">
+              {recentItems.length === 0 ? (
+                <p className="text-sm text-[var(--color-muted-foreground)] text-center py-8">系统运行正常，暂无新动态</p>
+              ) : (
+                <div className="space-y-1">
+                  {recentItems.map((item, i) => (
+                    <div key={i} className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[var(--color-secondary)] transition-colors group cursor-pointer">
+                      <div className="size-8 rounded-md bg-[var(--color-secondary)] flex items-center justify-center shrink-0">
+                        {item.type === "research" && <Search className="size-4 text-[var(--color-primary)]" />}
+                        {item.type === "editing" && <Clapperboard className="size-4 text-[var(--color-warning)]" />}
+                        {item.type === "feedback" && <FileText className="size-4 text-[var(--color-success)]" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm truncate">{item.title}</p>
+                        <p className="text-xs text-[var(--color-muted-foreground)]">{formatDate(item.time)}</p>
+                      </div>
+                      <Badge variant="outline" className="text-[11px] shrink-0">{item.status}</Badge>
+                      <ChevronRight className="size-3.5 text-[var(--color-muted-foreground)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                  ))}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm truncate">
-                    {item.type === "research" && `竞品调研 · ${(item as typeof mockCompetitiveResearch[0]).competitorName}`}
-                    {item.type === "script" && `脚本版本 · ${(item as typeof mockScriptVersions[0]).version}`}
-                    {item.type === "editing" && `剪辑任务 · ${(item as typeof mockEditingTasks[0]).scriptId}`}
-                  </p>
-                  <p className="text-xs text-[var(--color-muted-foreground)]">{formatDate(item.date)}</p>
-                </div>
-                {"status" in item && (
-                  <Badge variant="outline" className="text-xs">
-                    {item.status}
-                  </Badge>
-                )}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <CheckCircle2 className="size-4" />
-              快捷操作
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <Link href="/competitive-research">
-              <Button variant="outline" className="w-full justify-start gap-2 h-11">
-                <Search className="size-4" />
-                新建竞品调研
-                <ArrowRight className="size-3 ml-auto" />
-              </Button>
-            </Link>
-            <Link href="/storyboard">
-              <Button variant="outline" className="w-full justify-start gap-2 h-11">
-                <Film className="size-4" />
-                生成故事板
-                <ArrowRight className="size-3 ml-auto" />
-              </Button>
-            </Link>
-            <Link href="/auto-editing">
-              <Button variant="outline" className="w-full justify-start gap-2 h-11">
-                <Clapperboard className="size-4" />
-                开始自动剪辑
-                <ArrowRight className="size-3 ml-auto" />
-              </Button>
-            </Link>
-            <Link href="/one-click-replicate">
-              <Button variant="outline" className="w-full justify-start gap-2 h-11">
-                <Copy className="size-4" />
-                使用模板复刻
-                <ArrowRight className="size-3 ml-auto" />
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+        {/* Quick Actions + Progress */}
+        <div className="space-y-4">
+          {/* Workflow Progress */}
+          <Card className="shadow-card">
+            <div className="px-5 pt-5 pb-3">
+              <h2 className="text-[15px] font-medium flex items-center gap-2"><TrendingUp className="size-4 text-[var(--color-muted-foreground)]" />流程进度</h2>
+            </div>
+            <CardContent className="px-5 pb-5 pt-0 space-y-3">
+              {[
+                { label: "竞品调研", count: stats.totalResearch, color: "#165dff", bg: "#e8f0fe" },
+                { label: "故事板", count: stats.totalStoryboards, color: "#00b42a", bg: "#e8f7ed" },
+                { label: "反馈记录", count: stats.feedbackCount, color: "#ff7d00", bg: "#fff7e8" },
+                { label: "脚本版本", count: stats.scriptCount, color: "#722ed1", bg: "#f5e8ff" },
+                { label: "剪辑任务", count: stats.completedEditing, color: "#14c9c9", bg: "#e8fffb" },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center gap-2.5">
+                  <div className="size-2 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                  <span className="text-sm flex-1">{item.label}</span>
+                  <span className="text-sm font-medium">{item.count}</span>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Quick Actions */}
+          <Card className="shadow-card">
+            <div className="px-5 pt-5 pb-3">
+              <h2 className="text-[15px] font-medium flex items-center gap-2"><Sparkles className="size-4 text-[var(--color-muted-foreground)]" />快捷操作</h2>
+            </div>
+            <CardContent className="px-5 pb-5 pt-0 space-y-2">
+              {[
+                { href: "/competitive-research", label: "新建竞品调研", icon: Search },
+                { href: "/storyboard", label: "生成故事板", icon: Film },
+                { href: "/auto-editing", label: "开始自动剪辑", icon: Clapperboard },
+                { href: "/one-click-replicate", label: "使用模板复刻", icon: Copy },
+              ].map((action) => (
+                <Link key={action.href} href={action.href}>
+                  <Button variant="secondary" className="w-full justify-start gap-2.5 h-10 text-sm font-normal">
+                    <action.icon className="size-4 text-[var(--color-muted-foreground)]" />
+                    {action.label}
+                    <ChevronRight className="size-3.5 ml-auto text-[var(--color-muted-foreground)]" />
+                  </Button>
+                </Link>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
       </div>
-
-      {/* Alert Banner */}
-      <Card className="bg-[var(--color-accent)] border-emerald-200">
-        <CardContent className="p-4 flex items-center gap-3">
-          <div className="size-8 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="size-4 text-white" />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-emerald-900">系统运行正常</p>
-            <p className="text-xs text-emerald-700">所有模块运行正常，飞书生态连接稳定 · 最近更新: 10分钟前</p>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
