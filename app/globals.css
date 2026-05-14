@@ -50,4 +50,27 @@
   .shadow-card-hover {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 0 2px rgba(0, 0, 0, 0.08);
   }
+
+  /* Data display utilities */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+  .data-table th {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-muted-foreground);
+    text-align: left;
+    padding: 10px 16px;
+    vertical-align: middle;
+  }
+  .data-table td {
+    font-size: 13px;
+    padding: 10px 16px;
+    vertical-align: middle;
+    text-align: left;
+  }
+  .data-table td.numeric {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
 }
