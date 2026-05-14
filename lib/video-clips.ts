@@ -5,7 +5,8 @@ import path from "path";
 
 const execAsync = promisify(exec);
 
-const FFMPEG_PATH = process.env.FFMPEG_PATH || "ffmpeg";
+import ffmpegStatic from "ffmpeg-static";
+const FFMPEG_PATH = process.env.FFMPEG_PATH || ffmpegStatic || "ffmpeg";
 const CLIPS_DIR = path.join(process.cwd(), "public", "clips");
 
 export interface VideoClip {

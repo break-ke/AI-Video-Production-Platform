@@ -36,7 +36,16 @@
       "Bash(node -p \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\)\\); 'OK: '+d.data.id+' | '+d.data.competitorName+' | Videos: '+\\(d.data.viralVideos?.length||0\\)+' | Shots: '+\\(d.data.viralVideos?.[0]?.shots?.length||0\\)\")",
       "Bash(npx plugins *)",
       "Bash(vercel deploy *)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Read(//tmp/**)",
+      "Read(//c/Users/Administrator/bin/**)",
+      "Bash(node -e \"const p = require\\('ffmpeg-static'\\); console.log\\('FFmpeg path:', p\\)\")",
+      "Bash(node -e \"const p = require\\('ffmpeg-static'\\); const { execSync } = require\\('child_process'\\); try { const v = execSync\\('\\\\`\\\\\"' + p + '\\\\\" -version\\\\`', { timeout: 5000 }\\).toString\\(\\); console.log\\('FFmpeg OK:', v.split\\('\\\\\\\\n'\\)[0]\\); } catch\\(e\\) { console.log\\('FFmpeg error:', e.message.substring\\(0,100\\)\\); }\")",
+      "Bash(node_modules/ffmpeg-static/ffmpeg.exe -version)",
+      "Bash(node_modules/ffmpeg-static/ffmpeg.exe -y -ss 2 -i public/clips/test_source.mp4 -t 3 -c:v libx264 -preset ultrafast -crf 28 -an public/clips/test_shot.mp4)",
+      "Bash(mkdir -p public/clips)",
+      "Bash(node_modules/ffmpeg-static/ffmpeg.exe -y -f lavfi -i testsrc=duration=10:size=320x240:rate=24 -f lavfi -i sine=frequency=440:duration=10 -c:v libx264 -preset ultrafast -crf 28 -c:a aac public/clips/test_gen.mp4)",
+      "Bash(node_modules/ffmpeg-static/ffmpeg.exe -y -ss 2 -i public/clips/test_gen.mp4 -t 3 -c:v libx264 -preset ultrafast -crf 28 -an public/clips/test_shot1.mp4)"
     ]
   }
 }
