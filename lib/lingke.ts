@@ -112,37 +112,46 @@ export async function geminiChat(
   videoUrl?: string,
   options: { maxTokens?: number; temperature?: number } = {}
 ): Promise<string> {
-  const contents: Record<string, unknown>[] = [
-    { role: "user", parts: [{ text: userPrompt }] },
-  ];
+  const parts: Record<string, unknown>[] = [{ text: userPrompt }];
 
   // If video URL provided, add as multimodal input
   if (videoUrl) {
-    contents[0] = {
-      role: "user",
-      parts: [
-        { text: userPrompt },
-        { file_data: { mime_type: "video/mp4", file_uri: videoUrl } },
-      ],
-    };
+    parts.push({ file_data: { mime_type: "video/mp4", file_uri: videoUrl } });
   }
+
+  const body: Record<string, unknown> = {
+    contents: [{ role: "user", parts }],
+    systemInstruction: { parts: [{ text: systemPrompt }] },
+    generationConfig: {
+      maxOutputTokens: options.maxTokens || 8192,
+      temperature: options.temperature ?? 0.3,
+      thinkingConfig: { thinkingBudget: 1024 }, // reserve budget for thinking
+    },
+  };
+
+  console.log("[Gemini] Calling model:", model, "videoUrl:", videoUrl ? "yes" : "no");
 
   const data = await lingkeFetch(
     `/v1beta/models/${model}:generateContent`,
-    {
-      method: "POST",
-      body: JSON.stringify({
-        contents,
-        systemInstruction: { parts: [{ text: systemPrompt }] },
-        generationConfig: {
-          maxOutputTokens: options.maxTokens || 4096,
-          temperature: options.temperature ?? 0.3,
-        },
-      }),
-    }
+    { method: "POST", body: JSON.stringify(body) }
   );
 
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  // Handle Gemini thinking model response: skip "thought" parts
+  const parts_ = data.candidates?.[0]?.content?.parts;
+  if (!parts_ || !Array.isArray(parts_)) {
+    console.error("[Gemini] No parts in response:", JSON.stringify(data).substring(0, 200));
+    return "";
+  }
+
+  // Filter out thinking parts and join real text
+  const textParts = parts_
+    .filter((p: Record<string, unknown>) => !p.thought)
+    .map((p: Record<string, unknown>) => p.text || "")
+    .filter(Boolean);
+
+  const result = textParts.join("");
+  console.log("[Gemini] Response length:", result.length);
+  return result;
 }
 
 // -------- Balance check --------

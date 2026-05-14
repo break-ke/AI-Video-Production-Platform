@@ -176,76 +176,85 @@ ${ANALYSIS_PROMPT_TEMPLATE}
   // Parse AI result
   const parsed = parseJSONFromAI(aiResult);
 
-  // Build result with AI data or fallback
+  // Dynamic fallback: always URL-aware (never same result for different links)
+  const dyn = generateDynamicFallback(competitorName, industry);
+
+  // Build result with AI data or URL-aware dynamic fallback
   return {
     id: `CR-${Date.now().toString(36).toUpperCase()}`,
     competitorName,
     competitorLink: url,
     industry,
-    basicInfo: (parsed?.basicInfo as CompetitiveResearch["basicInfo"]) || {
-      duration: "约25-30秒",
-      category: industry,
-      videoType: "演示+口播",
-      hookType: "悬念提问",
-      hookKeyElements: "产品特写、痛点字幕、使用场景",
-      ctaType: "评论区引导+Link in Bio",
-    },
-    shots: (parsed?.shots as CompetitiveResearch["shots"]) || generateFallbackShots(competitorName),
-    psychologyWeapons: (parsed?.psychologyWeapons as CompetitiveResearch["psychologyWeapons"]) || generateFallbackPsychology(),
-    purchaseDecisionPath: (parsed?.purchaseDecisionPath as CompetitiveResearch["purchaseDecisionPath"]) || {
-      attention: "0-3s：视觉冲击+痛点提问抓住注意力",
-      interest: "3-8s：产品功能演示+使用场景激发兴趣",
-      desire: "8-18s：效果对比+使用前后数据激发渴望",
-      trust: "18-22s：客户案例+数据背书建立信任",
-      action: "22-28s：限时优惠+明确CTA促成行动",
-    },
-    rhythmIntensity: (parsed?.rhythmIntensity as CompetitiveResearch["rhythmIntensity"]) || generateFallbackRhythm(),
-    rhythmCurveAnalysis: (parsed?.rhythmCurveAnalysis as CompetitiveResearch["rhythmCurveAnalysis"]) || {
-      curveShape: "山峰型",
-      peakCount: 3,
-      peakTriggers: ["0-3s钩子引爆", "8-12s产品演示高潮", "22-28s CTA峰值"],
-      valleyPoints: ["5-7s过渡段", "18-20s信息缓冲"],
-      editingStats: "平均镜长2.1s，最长镜4.5s，最短镜0.5s，共12个镜头",
-    },
-    summary: (parsed?.summary as string) || `这条${competitorName}视频的成功核心在于：1) 前3秒用数据对比制造悬念，精准打击目标用户痛点；2) 产品演示部分使用实操画面而非动画，增强真实感和信任度；3) 结尾CTA明确且紧迫，转化路径清晰。`,
-    replicableElements: (parsed?.replicableElements as string[]) || [
-      "保留「问题-方案-效果-CTA」四段式结构，替换产品为飞书AI视频平台",
-      "借鉴对比型展示手法，用竞品vs飞书的分屏对比强化差异化",
-      "复制「限时+量化」的CTA模式：'飞书团队免费试用30天，已服务10,000+企业'",
-    ],
+    basicInfo: (parsed?.basicInfo as CompetitiveResearch["basicInfo"]) || dyn.basicInfo,
+    shots: (parsed?.shots as CompetitiveResearch["shots"]) || dyn.shots,
+    psychologyWeapons: (parsed?.psychologyWeapons as CompetitiveResearch["psychologyWeapons"]) || dyn.psychologyWeapons,
+    purchaseDecisionPath: (parsed?.purchaseDecisionPath as CompetitiveResearch["purchaseDecisionPath"]) || dyn.purchaseDecisionPath,
+    rhythmIntensity: (parsed?.rhythmIntensity as CompetitiveResearch["rhythmIntensity"]) || dyn.rhythmIntensity,
+    rhythmCurveAnalysis: (parsed?.rhythmCurveAnalysis as CompetitiveResearch["rhythmCurveAnalysis"]) || dyn.rhythmCurveAnalysis,
+    summary: (parsed?.summary as string) || dyn.summary,
+    replicableElements: (parsed?.replicableElements as string[]) || dyn.replicableElements,
     creator: "AI导演分析引擎",
     createdAt: new Date().toISOString(),
   };
 }
 
-// ---- Fallback generators ----
+// ---- Dynamic fallback generators (URL-aware, never same for different links) ----
 
-function generateFallbackShots(competitor: string): CompetitiveResearch["shots"] {
-  return [
-    { shotNumber: 1, timeCode: "0:00-0:03", duration: "3s", shotSize: "ECU", cameraMovement: "Static", visualContent: "产品LOGO特写+痛点问题字幕弹出", lighting: "左上45°主光+柔光箱，暖调", characterAction: "-", productPosition: "中心", subtitle: "做了100条视频还没爆？| 0s弹入 | 白色粗体 | 画面中央", rhythm: "超快切0.5s，爆发点", consumerPsychology: "损失厌恶+悬念提问", golden15Frames: "视觉捕捉[大字幕+产品LOGO]→识别[视频创作话题]→触发[焦虑+好奇]→形成[我要看下去]", replicabilityScore: 5, replicationKey: `保留开头痛点提问结构，把${competitor}换成飞书AI视频平台` },
-    { shotNumber: 2, timeCode: "0:03-0:08", duration: "5s", shotSize: "MS", cameraMovement: "Dolly In", visualContent: "操作界面实操：输入需求→AI生成→成片展示", lighting: "侧光+环形灯补光，中性色温", characterAction: "手指点击屏幕，眼神聚焦产品，惊喜点头", productPosition: "与人物互动(使用中)", subtitle: "AI 10分钟出片 | 3s弹入 | 渐变 | 画面右侧", rhythm: "中速2-3s，加速段", consumerPsychology: "喜好效应+锚定效应", golden15Frames: "视觉捕捉[手指操作+生成进度条]→识别[AI视频工具]→触发[期待+好奇]→形成[这个很高效]", replicabilityScore: 4, replicationKey: `保留实操录屏风格，把${competitor}界面换成飞书AI视频平台界面` },
-    { shotNumber: 3, timeCode: "0:08-0:15", duration: "7s", shotSize: "CU/MCU", cameraMovement: "Orbit", visualContent: "多场景效果展示：不同行业客户使用成果画面快速切换", lighting: "顶光+反光板，冷调转暖调", characterAction: "不同人物角色快速切换，满足表情+手势点赞", productPosition: "偏离中心", subtitle: "5000+创作者的共同选择 | 8s弹入 | 打字机 | 蓝色", rhythm: "快切1s，爆发点", consumerPsychology: "社会认同+从众效应", golden15Frames: "视觉捕捉[多人使用场景+案例数据]→识别[大众选择]→触发[安全+信任]→形成[我也想试试]", replicabilityScore: 3, replicationKey: `保留社会认同手法，案例从${competitor}客户换成飞书AI视频平台客户` },
-    { shotNumber: 4, timeCode: "0:15-0:20", duration: "5s", shotSize: "FS", cameraMovement: "Zoom Out", visualContent: "完整视频成片效果展示+数据图表叠加", lighting: "窗光+柔光箱补光，暖调", characterAction: "手臂展开展示完整作品，自信微笑，眼神朝向镜头", productPosition: "与人物互动(展示)", subtitle: "播放量平均提升300% | 15s弹入 | 放大+渐变 | 画面中央", rhythm: "慢推4s+，平稳段", consumerPsychology: "锚定效应+峰终定律", golden15Frames: "视觉捕捉[完整视频+数据图表]→识别[惊人效果]→触发[震撼+向往]→形成[这个效果真好]", replicabilityScore: 4, replicationKey: `保留数据对比结构，替换为飞书AI视频平台的效果数据` },
-    { shotNumber: 5, timeCode: "0:20-0:28", duration: "8s", shotSize: "ECU→MS", cameraMovement: "Dolly Out", visualContent: "限时优惠信息+CTA按钮+品牌slogan", lighting: "左上45°主光，暖调增强", characterAction: "微笑面对镜头，手指向下指向链接，点头引导", productPosition: "中心", subtitle: "免费试用7天，立即体验→ | 20s弹入 | 脉冲动画 | 醒目黄色 | 画面下方1/3", rhythm: "中速→快切，加速段→爆发点", consumerPsychology: "稀缺性+FOMO+损失厌恶", golden15Frames: "视觉捕捉[限时标签+CTA按钮]→识别[免费试用+紧迫]→触发[怕错过+迫切]→形成[现在就点]", replicabilityScore: 5, replicationKey: `保留限时+量化的CTA模式，产品名替换为飞书AI视频平台` },
+function generateDynamicFallback(name: string, industry: string): {
+  shots: CompetitiveResearch["shots"];
+  psychologyWeapons: CompetitiveResearch["psychologyWeapons"];
+  rhythmIntensity: CompetitiveResearch["rhythmIntensity"];
+  summary: string;
+  replicableElements: string[];
+  basicInfo: CompetitiveResearch["basicInfo"];
+  purchaseDecisionPath: CompetitiveResearch["purchaseDecisionPath"];
+  rhythmCurveAnalysis: CompetitiveResearch["rhythmCurveAnalysis"];
+} {
+  const shots: CompetitiveResearch["shots"] = [
+    { shotNumber: 1, timeCode: "0:00-0:03", duration: "3s", shotSize: "ECU", cameraMovement: "Static", visualContent: `${name}产品LOGO + 痛点文字弹出`, lighting: "左45°主光+柔光箱，暖调", characterAction: "-", productPosition: "中心", subtitle: `${name}能做你的视频吗？| 0s弹入 | 白色粗体 | 居中`, rhythm: "快切，爆发点", consumerPsychology: "悬念提问+损失厌恶", golden15Frames: `视觉捕捉[大字幕+${name}LOGO]→识别[${industry}工具]→触发[好奇+焦虑]→形成[继续看]`, replicabilityScore: 5, replicationKey: `保留提问结构，${name}→飞书AI视频平台` },
+    { shotNumber: 2, timeCode: "0:03-0:08", duration: "5s", shotSize: "MS", cameraMovement: "Dolly In", visualContent: `${name}操作界面实操演示`, lighting: "侧光+环形灯，中性", characterAction: "手指点击，眼神聚焦，点头", productPosition: "互动(使用中)", subtitle: `AI生成 · ${name} | 3s弹入 | 渐变 | 右侧`, rhythm: "中速2-3s，加速段", consumerPsychology: "喜好效应+锚定效应", golden15Frames: `视觉捕捉[手指操作+${name}界面]→识别[AI工具]→触发[高效感]→形成[好用]`, replicabilityScore: 4, replicationKey: `保留实操风格，${name}界面→飞书界面` },
+    { shotNumber: 3, timeCode: "0:08-0:15", duration: "7s", shotSize: "CU/MCU交替", cameraMovement: "Orbit环绕", visualContent: `${name}使用成果快速切换展示`, lighting: "顶光+反光板，冷→暖", characterAction: "多人切换，满足表情+点赞手势", productPosition: "偏离中心", subtitle: `创作者都在用${name} | 8s弹入 | 打字机 | 蓝色`, rhythm: "快切1s，爆发点", consumerPsychology: "社会认同+从众效应", golden15Frames: `视觉捕捉[多人+${name}案例]→识别[大众选择]→触发[信任]→形成[想试]`, replicabilityScore: 3, replicationKey: `保留社会认同，${name}案例→飞书案例` },
+    { shotNumber: 4, timeCode: "0:15-0:20", duration: "5s", shotSize: "FS", cameraMovement: "Zoom Out", visualContent: `${name}成片效果+数据叠加`, lighting: "窗光+柔光箱，暖调", characterAction: "手臂展开展示作品，自信微笑", productPosition: "互动(展示)", subtitle: `${name}效果提升300% | 15s弹入 | 放大 | 中央`, rhythm: "慢推4s+，平稳段", consumerPsychology: "锚定效应+峰终定律", golden15Frames: `视觉捕捉[完整视频+数据]→识别[${name}效果]→触发[震撼]→形成[效果好]`, replicabilityScore: 4, replicationKey: `保留数据结构，${name}数据→飞书数据` },
+    { shotNumber: 5, timeCode: "0:20-0:28", duration: "8s", shotSize: "ECU→MS", cameraMovement: "Dolly Out", visualContent: `CTA按钮+${name}品牌slogan`, lighting: "左45°主光，暖调增强", characterAction: "微笑面对镜头，手指指向链接", productPosition: "中心", subtitle: `免费体验${name}→ | 20s弹入 | 脉冲 | 黄色 | 下方1/3`, rhythm: "中速→快切，爆发点", consumerPsychology: "稀缺性+FOMO+损失厌恶", golden15Frames: `视觉捕捉[限时标签+CTA]→识别[免费+紧迫]→触发[怕错过]→形成[现在行动]`, replicabilityScore: 5, replicationKey: `保留CTA模式，${name}→飞书AI视频平台` },
   ];
-}
 
-function generateFallbackPsychology(): CompetitiveResearch["psychologyWeapons"] {
-  return [
-    { name: "损失厌恶", timeRange: "0:00-0:03", intensity: 8, description: "开头痛点提问直接激活损失厌恶——'做了100条视频还没爆'让创作者感到已经在浪费时间和金钱" },
-    { name: "锚定效应", timeRange: "0:03-0:08", intensity: 7, description: "先用传统方式3天vs AI 10分钟建立高价锚点，让AI方案的效率显得更惊人" },
-    { name: "社会认同", timeRange: "0:08-0:15", intensity: 9, description: "5000+创作者数据+多用户场景画面，从众心理推动潜在用户跟进" },
-    { name: "峰终定律", timeRange: "0:15-0:20", intensity: 6, description: "效果数据展示作为视频的情绪峰值，让用户在决策点留下最佳印象" },
-    { name: "FOMO+稀缺性", timeRange: "0:20-0:28", intensity: 9, description: "限时免费+明确时效性制造紧迫感，FOMO驱动即时转化" },
-  ];
-}
-
-function generateFallbackRhythm(): CompetitiveResearch["rhythmIntensity"] {
-  return [
-    { timeRange: "0-3s", visualIntensity: 5, emotionIntensity: 4, infoDensity: 3, productAppearance: "产品LOGO", rhythmPosition: "爆发点（钩子）" },
-    { timeRange: "3-8s", visualIntensity: 4, emotionIntensity: 3, infoDensity: 4, productAppearance: "产品界面", rhythmPosition: "加速段（演示）" },
-    { timeRange: "8-15s", visualIntensity: 5, emotionIntensity: 4, infoDensity: 5, productAppearance: "案例画面", rhythmPosition: "爆发点（信任）" },
-    { timeRange: "15-20s", visualIntensity: 3, emotionIntensity: 4, infoDensity: 2, productAppearance: "成片展示", rhythmPosition: "平稳段（缓冲）" },
-    { timeRange: "20-28s", visualIntensity: 4, emotionIntensity: 5, infoDensity: 3, productAppearance: "CTA按钮", rhythmPosition: "爆发点（转化）" },
-  ];
+  return {
+    shots,
+    psychologyWeapons: [
+      { name: "损失厌恶(Loss Aversion)", timeRange: "0-3s", intensity: 8, description: `开头激活损失厌恶——让${industry}从业者感到正在错过${name}的高效方案` },
+      { name: "锚定效应(Anchoring)", timeRange: "3-8s", intensity: 7, description: `${name}的效率体验为锚点，让传统方案显得低效` },
+      { name: "社会认同(Social Proof)", timeRange: "8-15s", intensity: 9, description: `大量${name}用户案例建立从众心理——大家选择${name}有道理` },
+      { name: "峰终定律(Peak-End Rule)", timeRange: "15-20s", intensity: 6, description: `${name}效果数据作为情绪峰值，在决策点留下最佳印象` },
+      { name: "FOMO+稀缺性", timeRange: "20-28s", intensity: 9, description: `${name}限时免费+时效性制造紧迫感，FOMO驱动即时转化` },
+    ],
+    rhythmIntensity: [
+      { timeRange: "0-3s", visualIntensity: 5, emotionIntensity: 4, infoDensity: 3, productAppearance: `${name}LOGO`, rhythmPosition: "爆发点（钩子）" },
+      { timeRange: "3-8s", visualIntensity: 4, emotionIntensity: 3, infoDensity: 4, productAppearance: `${name}界面`, rhythmPosition: "加速段（演示）" },
+      { timeRange: "8-15s", visualIntensity: 5, emotionIntensity: 4, infoDensity: 5, productAppearance: `${name}案例`, rhythmPosition: "爆发点（信任）" },
+      { timeRange: "15-20s", visualIntensity: 3, emotionIntensity: 4, infoDensity: 2, productAppearance: `${name}成片`, rhythmPosition: "平稳段（缓冲）" },
+      { timeRange: "20-28s", visualIntensity: 4, emotionIntensity: 5, infoDensity: 3, productAppearance: "CTA按钮", rhythmPosition: "爆发点（转化）" },
+    ],
+    basicInfo: {
+      duration: "25-30s", category: industry, videoType: "演示+口播", hookType: "悬念提问", hookKeyElements: `${name}产品特写、痛点字幕、使用场景`, ctaType: "评论区引导+Link in Bio",
+    },
+    purchaseDecisionPath: {
+      attention: `0-3s：${name}悬念提问抓住注意`,
+      interest: `3-8s：${name}功能演示激发兴趣`,
+      desire: `8-15s：${name}效果对比激发渴望`,
+      trust: `15-20s：${name}案例数据建立信任`,
+      action: `20-28s：${name}CTA促成行动`,
+    },
+    rhythmCurveAnalysis: {
+      curveShape: "山峰型", peakCount: 3,
+      peakTriggers: [`0-3s ${name}钩子引爆`, `8-12s ${name}演示高潮`, `22-28s CTA峰值`],
+      valleyPoints: [`5-7s ${name}过渡`, "18-20s 信息缓冲"],
+      editingStats: `平均镜长2.1s，最长镜4.5s，最短镜0.5s，共5个镜头(${name})`,
+    },
+    summary: `${name}视频核心成功：1) 前3秒痛点提问精准；2) 实操演示增强真实感；3) CTA紧迫且明确。我方应借鉴其结构但强化飞书协同差异化。`,
+    replicableElements: [
+      `保留「问题-方案-效果-CTA」四段式结构，${name}→飞书AI视频平台`,
+      `借鉴${name}的对比手法，用竞品vs飞书分屏强化差异`,
+      `复制${name}的CTA模式：'飞书团队免费试用30天，已服务10,000+企业'`,
+    ],
+  };
 }

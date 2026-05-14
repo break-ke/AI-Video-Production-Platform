@@ -77,3 +77,7 @@
 {"timestamp":"40:09:54.489","source":"Server","level":"LOG","message":"✓ Compiled in 393ms"}
 {"timestamp":"40:22:15.679","source":"Server","level":"LOG","message":"✓ Compiled in 128ms"}
 {"timestamp":"40:25:14.501","source":"Server","level":"LOG","message":"✓ Compiled in 128ms"}
+{"timestamp":"40:50:52.132","source":"Server","level":"LOG","message":"[Gemini] Calling model: \"gemini-3.1-pro-preview\" \"videoUrl:\" \"no\""}
+{"timestamp":"40:51:33.971","source":"Server","level":"LOG","message":"[Gemini] Response length: 5251"}
+{"timestamp":"40:51:35.877","source":"Server","level":"LOG","message":"[Gemini] Calling model: \"gemini-3.1-pro-preview\" \"videoUrl:\" \"no\""}
+{"timestamp":"40:52:11.127","source":"Server","level":"LOG","message":"[Gemini] Response length: 5022"}
