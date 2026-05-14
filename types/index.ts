@@ -85,10 +85,49 @@ export interface CompetitiveResearch {
   createdAt: string;
 }
 
+export interface StoryboardFrame {
+  frameNumber: number;        // e.g. 1
+  timeRange: string;          // e.g. "0-3s"
+  shotSize: string;           // 景别: 大全景/中景/特写/ECU/CU/MCU/MS/FS
+  cameraMovement: string;     // 运镜: 航拍缓慢推进/跟拍轻摇/微距推近/Dolly In/Pan/Static
+  visualContent: string;      // 画面内容
+  subtitleText: string;       // 字幕文案
+  emotionTags: string[];      // 情绪标签
+  action: string;             // 人物动作
+  soundDesign: string;        // 声音设计
+  transition: string;         // 转场: CUT/FADE OUT
+  imagePrompt: string;        // 绘图提示词 (English)
+  imageUrl: string;           // 生成的图片URL
+  status: "pending" | "confirmed" | "rejected";
+}
+
+export interface StoryboardStyleConfig {
+  styleTags: string[];        // 风格标签
+  colorPalette: string[];     // 色彩材质
+  lightingDesign: string;     // 光影设计
+  compositionNotes: string;   // 构图原则
+  lensLanguage: string;       // 镜头语言
+  sceneFocus: string[];       // 场景重点
+  propsList: string[];        // 道具清单
+  colorGrade: string;         // 调色说明
+  soundAtmosphere: string;    // 声音氛围
+  emotionKeywords: string[];  // 情绪关键词
+}
+
 export interface Storyboard {
   id: string;
   researchId: string;
-  sellingPointId: string;
+  templateType: "chinese_commercial" | "cinematic";
+  title: string;              // 故事板标题
+  subtitle: string;           // 副标题
+  styleConfig: StoryboardStyleConfig;
+  frames: StoryboardFrame[];  // 分镜列表
+  photographyNotes: string;   // 摄影美术说明
+  soundOverview: string;      // 声音氛围总览
+  emotionalArc: string;       // 情绪弧线
+  visualNotes: string;        // 视觉说明
+  endingNote: string;         // 结尾说明
+  // Legacy fields for compatibility
   frameNumber: number;
   imageDescription: string;
   prompt: string;

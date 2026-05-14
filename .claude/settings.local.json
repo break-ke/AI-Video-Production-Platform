@@ -50,7 +50,14 @@
       "Bash(npm ls *)",
       "Bash(npm uninstall *)",
       "Bash(npx playwright *)",
-      "Bash(timeout 30 npx tsx -e ' *)"
+      "Bash(timeout 30 npx tsx -e ' *)",
+      "Bash(请仔细识别这两张图片中的所有中文文字内容，逐字逐句输出。)",
+      "Bash(第一张图片: http://localhost:3000/uploads/storyboard_template_1.jpg)",
+      "Bash(第二张图片: http://localhost:3000/uploads/storyboard_template_2.jpg)",
+      "Bash(这是故事板/脚本生成的提示词模板。请完整输出所有文字信息，包括表格结构、字段说明等。)",
+      "Bash(npx tsx *)",
+      "Bash(LINGKE_API_KEY=\"sk-e22d0bbdd35dc662c97a44a6dd49467eb8e9c5a4940b53c4\" LINGKE_BASE_URL=\"https://api.ai6800.com/api\" npx tsx scripts/read-images.ts)",
+      "Bash(NODE_OPTIONS=\"--max-old-space-size=8192\" npx next build)"
     ]
   }
 }

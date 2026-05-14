@@ -9,17 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { formatDate } from "@/lib/utils";
 import type { Storyboard } from "@/types";
 import {
-  Film,
-  Check,
-  X,
-  Edit3,
-  Eye,
-  Plus,
-  Grid3x3,
-  List,
-  Loader2,
-  Sparkles,
-  ImageIcon,
+  Film, Check, X, Edit3, Eye, Plus, Grid3x3, List, Loader2, Sparkles,
+  Camera, Palette, Volume2, Lightbulb, Tag,
 } from "lucide-react";
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
@@ -35,49 +26,29 @@ export default function StoryboardPage() {
   const [selected, setSelected] = useState<Storyboard | null>(null);
   const [showDetail, setShowDetail] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
-  const [genPrompt, setGenPrompt] = useState("");
-  const [genFrameNum, setGenFrameNum] = useState(1);
-  const [genDesc, setGenDesc] = useState("");
+  const [genTopic, setGenTopic] = useState("");
+  const [genStyle, setGenStyle] = useState("chinese_commercial");
   const [generating, setGenerating] = useState(false);
 
   const fetchData = useCallback(async () => {
-    try {
-      const res = await fetch("/api/storyboard");
-      const json = await res.json();
-      if (json.success) setData(json.data);
-    } finally {
-      setLoading(false);
-    }
+    try { const r = await fetch("/api/storyboard"); const j = await r.json(); if (j.success) setData(j.data); }
+    finally { setLoading(false); }
   }, []);
-
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const confirmed = data.filter((s) => s.status === "confirmed").length;
-  const pending = data.filter((s) => s.status === "pending").length;
 
   const handleGenerate = async () => {
-    if (!genPrompt) return;
+    if (!genTopic) return;
     setGenerating(true);
     try {
       const res = await fetch("/api/storyboard", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt: genPrompt,
-          frameNumber: genFrameNum,
-          imageDescription: genDesc || genPrompt.slice(0, 50),
-        }),
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic: genTopic, style: genStyle }),
       });
       const json = await res.json();
-      if (json.success) {
-        setData([json.data, ...data]);
-        setShowAdd(false);
-        setGenPrompt("");
-        setGenDesc("");
-      }
-    } finally {
-      setGenerating(false);
-    }
+      if (json.success) { setData([json.data, ...data]); setShowAdd(false); setGenTopic(""); }
+    } finally { setGenerating(false); }
   };
 
   const handleStatus = async (id: string, status: "confirmed" | "rejected") => {
@@ -85,110 +56,100 @@ export default function StoryboardPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl">
+    <div className="space-y-6 max-w-[1440px]">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold">故事板管理</h2>
-          <p className="text-sm text-[var(--color-muted-foreground)]">
-            AI生成分镜故事板，{confirmed}已确认 / {pending}待确认
-          </p>
-        </div>
+        <div><h1 className="text-[22px] font-semibold tracking-tight">故事板生成</h1><p className="text-[13px] text-zinc-500 mt-0.5">双模板参考：中国商业广告风格 / 电影感风格 · {confirmed}已确认</p></div>
         <div className="flex items-center gap-2">
-          <div className="flex border rounded-lg p-0.5">
-            <Button variant={viewMode === "grid" ? "secondary" : "ghost"} size="sm" onClick={() => setViewMode("grid")}><Grid3x3 className="size-4" /></Button>
-            <Button variant={viewMode === "list" ? "secondary" : "ghost"} size="sm" onClick={() => setViewMode("list")}><List className="size-4" /></Button>
-          </div>
-          <Button className="gap-2" onClick={() => setShowAdd(true)}><Plus className="size-4" />生成故事板</Button>
+          <div className="flex border rounded-lg p-0.5"><Button variant={viewMode==="grid"?"secondary":"ghost"} size="sm" onClick={()=>setViewMode("grid")}><Grid3x3 className="size-4"/></Button><Button variant={viewMode==="list"?"secondary":"ghost"} size="sm" onClick={()=>setViewMode("list")}><List className="size-4"/></Button></div>
+          <Button className="gap-2" onClick={()=>setShowAdd(true)}><Plus className="size-4"/>生成故事板</Button>
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center py-20"><Loader2 className="size-6 animate-spin text-[var(--color-muted-foreground)]" /></div>
-      ) : data.length === 0 ? (
-        <div className="text-center py-16">
-          <Film className="size-10 text-[var(--color-muted-foreground)] mx-auto mb-3" />
-          <p className="text-sm text-[var(--color-muted-foreground)]">暂无故事板，点击「生成故事板」开始</p>
-        </div>
-      ) : viewMode === "grid" ? (
+      {loading ? <div className="flex justify-center py-20"><Loader2 className="size-5 animate-spin text-zinc-400"/></div>
+      : data.length===0 ? <div className="text-center py-16"><Film className="size-10 text-zinc-300 mx-auto mb-3"/><p className="text-sm text-zinc-500">暂无故事板，点击生成开始</p></div>
+      : viewMode==="grid" ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {data.map((item) => {
-            const status = STATUS_MAP[item.status] || STATUS_MAP.pending;
-            return (
-              <Card key={item.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                <div className="aspect-video bg-[var(--color-muted)] relative overflow-hidden group">
-                  <img src={item.imageUrl} alt={`分镜 ${item.frameNumber}`} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                    <Button variant="secondary" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => { setSelected(item); setShowDetail(true); }}>
-                      <Eye className="size-3 mr-1" />查看详情
-                    </Button>
-                  </div>
-                  <div className="absolute top-2 right-2"><span className={`px-2 py-0.5 rounded-md text-xs font-medium ${status.color}`}>{status.label}</span></div>
-                  <div className="absolute top-2 left-2 bg-black/60 text-white px-2 py-0.5 rounded text-xs">分镜 #{item.frameNumber}</div>
+          {data.map(item => (
+            <Card key={item.id} className="overflow-hidden hover:shadow-md transition-shadow">
+              <div className="aspect-video bg-zinc-100 relative overflow-hidden group">
+                <img src={item.imageUrl||item.frames?.[0]?.imageUrl} alt="" className="w-full h-full object-cover"/>
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                  <Button variant="secondary" size="sm" className="opacity-0 group-hover:opacity-100" onClick={()=>{setSelected(item);setShowDetail(true);}}><Eye className="size-3 mr-1"/>查看详情</Button>
                 </div>
-                <CardContent className="p-3">
-                  <p className="text-sm line-clamp-2 mb-2">{item.imageDescription}</p>
-                  <p className="text-xs text-[var(--color-muted-foreground)] truncate mb-3">提示词: {item.prompt}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-[var(--color-muted-foreground)]">{item.id}</span>
-                    <div className="flex gap-1">
-                      <Button size="sm" variant="ghost" className="size-8 p-0" onClick={() => handleStatus(item.id, "confirmed")}><Check className="size-4 text-emerald-500" /></Button>
-                      <Button size="sm" variant="ghost" className="size-8 p-0"><Edit3 className="size-4 text-blue-500" /></Button>
-                      <Button size="sm" variant="ghost" className="size-8 p-0" onClick={() => handleStatus(item.id, "rejected")}><X className="size-4 text-red-500" /></Button>
-                    </div>
+                <div className="absolute top-2 right-2"><span className={`px-2 py-0.5 rounded-md text-xs font-medium ${STATUS_MAP[item.status]?.color}`}>{STATUS_MAP[item.status]?.label}</span></div>
+                <div className="absolute top-2 left-2 bg-black/60 text-white px-2 py-0.5 rounded text-xs">{item.frames?.length||item.frameNumber||0} 个分镜</div>
+              </div>
+              <CardContent className="p-3">
+                <p className="text-sm font-medium truncate">{item.title||item.imageDescription}</p>
+                {item.styleConfig && <div className="flex flex-wrap gap-1 mt-1">{item.styleConfig.styleTags?.slice(0,3).map(t=><Badge key={t} variant="outline" className="text-[10px]">{t}</Badge>)}</div>}
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-xs text-zinc-500">{item.id}</span>
+                  <div className="flex gap-1">
+                    <Button size="sm" variant="ghost" className="size-8 p-0" onClick={()=>handleStatus(item.id,"confirmed")}><Check className="size-4 text-emerald-500"/></Button>
+                    <Button size="sm" variant="ghost" className="size-8 p-0" onClick={()=>handleStatus(item.id,"rejected")}><X className="size-4 text-red-500"/></Button>
                   </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       ) : (
-        <Card><CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead><tr className="border-b bg-[var(--color-muted)]/50">
-                <th className="text-left p-3 text-xs font-medium">ID</th><th className="text-left p-3 text-xs font-medium">分镜</th><th className="text-left p-3 text-xs font-medium">画面描述</th><th className="text-left p-3 text-xs font-medium">提示词</th><th className="text-center p-3 text-xs font-medium">状态</th><th className="text-left p-3 text-xs font-medium">时间</th><th className="text-center p-3 text-xs font-medium">操作</th>
-              </tr></thead>
-              <tbody>
-                {data.map((item) => {
-                  const status = STATUS_MAP[item.status] || STATUS_MAP.pending;
-                  return (
-                    <tr key={item.id} className="border-b hover:bg-[var(--color-muted)]/30">
-                      <td className="p-3 text-sm font-mono">{item.id}</td>
-                      <td className="p-3"><div className="size-12 rounded overflow-hidden"><img src={item.imageUrl} alt="" className="w-full h-full object-cover" /></div></td>
-                      <td className="p-3 text-sm max-w-xs truncate">{item.imageDescription}</td>
-                      <td className="p-3 text-sm text-[var(--color-muted-foreground)] max-w-xs truncate">{item.prompt}</td>
-                      <td className="p-3 text-center"><span className={`px-2 py-0.5 rounded-md text-xs font-medium ${status.color}`}>{status.label}</span></td>
-                      <td className="p-3 text-sm whitespace-nowrap">{formatDate(item.createdAt)}</td>
-                      <td className="p-3"><div className="flex items-center justify-center gap-1">
-                        <Button variant="ghost" size="sm" onClick={() => { setSelected(item); setShowDetail(true); }}><Eye className="size-4" /></Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleStatus(item.id, "confirmed")}><Check className="size-4 text-emerald-500" /></Button>
-                      </div></td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </CardContent></Card>
+        <Card><CardContent className="p-0 overflow-x-auto"><table className="w-full"><thead><tr className="border-b bg-zinc-50"><th className="text-left p-3 text-xs">ID</th><th className="text-left p-3 text-xs">标题</th><th className="text-left p-3 text-xs">模板</th><th className="text-center p-3 text-xs">分镜</th><th className="text-center p-3 text-xs">状态</th><th className="text-left p-3 text-xs">时间</th></tr></thead><tbody>{data.map(item=>(<tr key={item.id} className="border-b hover:bg-zinc-50/50 cursor-pointer" onClick={()=>{setSelected(item);setShowDetail(true);}}><td className="p-3 text-sm font-mono">{item.id}</td><td className="p-3 text-sm font-medium">{item.title||item.imageDescription}</td><td className="p-3"><Badge variant="outline" className="text-xs">{item.templateType==="cinematic"?"电影感":"中国商业广告"}</Badge></td><td className="p-3 text-center text-sm">{item.frames?.length||0}</td><td className="p-3 text-center"><Badge className={`text-xs ${STATUS_MAP[item.status]?.color}`}>{STATUS_MAP[item.status]?.label}</Badge></td><td className="p-3 text-sm text-zinc-500">{formatDate(item.createdAt)}</td></tr>))}</tbody></table></CardContent></Card>
       )}
 
       {/* Detail Dialog */}
       <Dialog open={showDetail} onOpenChange={setShowDetail}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader><DialogTitle className="flex items-center gap-2"><Film className="size-5" />分镜详情 · {selected?.id}</DialogTitle></DialogHeader>
+        <DialogContent className="max-w-5xl max-h-[88vh] overflow-y-auto">
+          <DialogHeader><DialogTitle className="text-lg flex items-center gap-2"><Film className="size-5"/>{selected?.title||"故事板详情"}</DialogTitle></DialogHeader>
           {selected && (
-            <div className="space-y-4">
-              <div className="aspect-video rounded-lg overflow-hidden bg-[var(--color-muted)]"><img src={selected.imageUrl} alt="" className="w-full h-full object-cover" /></div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><p className="text-xs text-[var(--color-muted-foreground)]">分镜序号</p><p className="font-medium">#{selected.frameNumber}</p></div>
-                <div><p className="text-xs text-[var(--color-muted-foreground)]">状态</p><span className={`px-2 py-0.5 rounded-md text-xs font-medium ${(STATUS_MAP[selected.status] || STATUS_MAP.pending).color}`}>{(STATUS_MAP[selected.status] || STATUS_MAP.pending).label}</span></div>
+            <div className="space-y-5">
+              {/* Style Config */}
+              {selected.styleConfig && (
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                  {[
+                    {l:"风格",v:selected.styleConfig.styleTags?.join("、"),icon:Tag},
+                    {l:"色彩",v:selected.styleConfig.colorPalette?.join("、"),icon:Palette},
+                    {l:"光影",v:selected.styleConfig.lightingDesign,icon:Camera},
+                    {l:"声音",v:selected.styleConfig.soundAtmosphere,icon:Volume2},
+                    {l:"情绪",v:selected.styleConfig.emotionKeywords?.join("、"),icon:Lightbulb},
+                  ].map(m=>(<Card key={m.l} className="shadow-card"><CardContent className="p-3 text-center"><m.icon className="size-4 mx-auto mb-1 text-zinc-400"/><p className="text-[11px] text-zinc-500 mb-0.5">{m.l}</p><p className="text-[12px] font-medium leading-tight">{m.v||"-"}</p></CardContent></Card>))}
+                </div>
+              )}
+
+              {/* Frames */}
+              <div className="space-y-3">
+                <p className="text-sm font-semibold flex items-center gap-2"><Camera className="size-4"/>分镜列表 ({selected.frames?.length||0})</p>
+                {selected.frames?.map((f,i)=>(
+                  <Card key={i} className="shadow-card overflow-hidden">
+                    <div className="flex">
+                      <div className="w-[180px] shrink-0 bg-zinc-100">
+                        <img src={f.imageUrl||`https://picsum.photos/seed/${selected.id}_${i}/400/300`} alt="" className="w-full h-full object-cover"/>
+                      </div>
+                      <CardContent className="p-4 flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="font-mono text-sm font-bold">{f.timeRange}</span>
+                          <Badge variant="outline" className="text-[10px]">{f.shotSize}</Badge>
+                          <Badge variant="outline" className="text-[10px]">{f.cameraMovement}</Badge>
+                          <span className="ml-auto text-yellow-500">{"★".repeat(f.status==="confirmed"?5:f.status==="pending"?3:1)}</span>
+                        </div>
+                        <p className="text-[13px] mb-1.5"><span className="text-xs text-zinc-500">画面：</span>{f.visualContent}</p>
+                        <p className="text-[13px] mb-1.5"><span className="text-xs text-zinc-500">字幕：</span>{f.subtitleText}</p>
+                        <p className="text-[13px] mb-1.5"><span className="text-xs text-zinc-500">情绪：</span>{(f.emotionTags||[]).join("、")} | 声音：{f.soundDesign} | 转场：{f.transition}</p>
+                        <p className="text-[12px] text-zinc-400 font-mono">Prompt: {f.imagePrompt}</p>
+                      </CardContent>
+                    </div>
+                  </Card>
+                ))}
               </div>
-              <div><p className="text-sm font-medium mb-1">画面描述</p><p className="text-sm bg-[var(--color-muted)] rounded-lg p-3">{selected.imageDescription}</p></div>
-              <div><p className="text-sm font-medium mb-1">绘图提示词</p><p className="text-sm font-mono bg-[var(--color-muted)] rounded-lg p-3">{selected.prompt}</p></div>
+
+              {/* Photography Notes */}
+              {selected.photographyNotes && <Card className="shadow-card border-l-[3px] border-l-[var(--color-primary)]"><CardContent className="p-4"><p className="text-sm font-semibold mb-2 flex items-center gap-2"><Camera className="size-4"/>摄影美术说明</p><p className="text-[13px] text-zinc-600">{selected.photographyNotes}</p></CardContent></Card>}
+              {selected.emotionalArc && <Card className="shadow-card"><CardContent className="p-4"><p className="text-sm font-semibold mb-1 flex items-center gap-2"><Lightbulb className="size-4 text-yellow-500"/>情绪弧线</p><p className="text-[13px] text-zinc-600">{selected.emotionalArc}</p></CardContent></Card>}
+
               <div className="flex gap-2">
-                <Button className="flex-1 gap-2" variant="outline" onClick={() => handleStatus(selected.id, "confirmed")}><Check className="size-4" />确认</Button>
-                <Button className="flex-1 gap-2" variant="outline"><Edit3 className="size-4" />修改</Button>
-                <Button className="flex-1 gap-2" variant="outline" onClick={() => handleStatus(selected.id, "rejected")}><X className="size-4" />拒绝</Button>
+                <Button className="flex-1" variant="outline" onClick={()=>handleStatus(selected.id,"confirmed")}><Check className="size-4 mr-1"/>确认</Button>
+                <Button className="flex-1" variant="outline"><Edit3 className="size-4 mr-1"/>修改</Button>
+                <Button className="flex-1" variant="outline" onClick={()=>handleStatus(selected.id,"rejected")}><X className="size-4 mr-1"/>拒绝</Button>
               </div>
             </div>
           )}
@@ -197,34 +158,21 @@ export default function StoryboardPage() {
 
       {/* Generate Dialog */}
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
-        <DialogContent>
-          <DialogHeader><DialogTitle className="flex items-center gap-2"><Sparkles className="size-5" />生成故事板</DialogTitle></DialogHeader>
+        <DialogContent><DialogHeader><DialogTitle><Sparkles className="size-5 inline mr-2"/>生成故事板</DialogTitle></DialogHeader>
           <div className="space-y-3">
-            <div>
-              <label className="text-sm font-medium">分镜序号</label>
-              <Input type="number" value={genFrameNum} onChange={(e) => setGenFrameNum(Number(e.target.value))} min={1} max={20} />
-            </div>
-            <div>
-              <label className="text-sm font-medium">画面描述（可选）</label>
-              <Input placeholder="简述这个分镜要表达什么..." value={genDesc} onChange={(e) => setGenDesc(e.target.value)} />
-            </div>
-            <div>
-              <label className="text-sm font-medium">绘图提示词</label>
-              <textarea
-                className="w-full h-24 rounded-md border border-[var(--color-input)] bg-[var(--color-background)] px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
-                placeholder="描述画面内容、风格、光线、镜头角度...（建议用英文，效果更好）"
-                value={genPrompt}
-                onChange={(e) => setGenPrompt(e.target.value)}
-              />
+            <div><label className="text-[13px] font-medium">故事板主题</label><Input placeholder="如：AI视频工具产品推广 / 千户苗寨人文风光" value={genTopic} onChange={e=>setGenTopic(e.target.value)}/></div>
+            <div><label className="text-[13px] font-medium">模板风格</label>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <button onClick={()=>setGenStyle("chinese_commercial")} className={`p-3 rounded-lg border-2 text-left transition-colors ${genStyle==="chinese_commercial"?"border-[var(--color-primary)] bg-blue-50":"border-zinc-200 hover:border-zinc-300"}`}>
+                  <p className="text-sm font-medium">中国商业广告</p><p className="text-[11px] text-zinc-500">15秒 / 全程中文 / 色彩+光影+情绪标签</p>
+                </button>
+                <button onClick={()=>setGenStyle("cinematic")} className={`p-3 rounded-lg border-2 text-left transition-colors ${genStyle==="cinematic"?"border-[var(--color-primary)] bg-blue-50":"border-zinc-200 hover:border-zinc-300"}`}>
+                  <p className="text-sm font-medium">电影感</p><p className="text-[11px] text-zinc-500">CAMERA/SOUND/TRANSITION/EMOTIONAL ARC</p>
+                </button>
+              </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAdd(false)}>取消</Button>
-            <Button onClick={handleGenerate} disabled={generating || !genPrompt} className="gap-2">
-              {generating ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
-              {generating ? "生成中（约2分钟）..." : "AI生成图片"}
-            </Button>
-          </DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={()=>setShowAdd(false)}>取消</Button><Button onClick={handleGenerate} disabled={generating||!genTopic}>{generating?<><Loader2 className="size-4 animate-spin mr-2"/>生成中...</>:<><Sparkles className="size-4 mr-2"/>AI生成故事板</>}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
