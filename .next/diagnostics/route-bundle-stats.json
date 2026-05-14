@@ -1,13 +1,13 @@
 [
   {
     "route": "/competitive-research",
-    "firstLoadUncompressedJsBytes": 652603,
+    "firstLoadUncompressedJsBytes": 652791,
     "firstLoadChunkPaths": [
       ".next\\static\\chunks\\0-5kj8m5lcbft.js",
       ".next\\static\\chunks\\0d3shmwh5_nmn.js",
       ".next\\static\\chunks\\10vuyll1b_-~-.js",
       ".next\\static\\chunks\\0usbhpozr2z90.js",
-      ".next\\static\\chunks\\0mrni~_hp-5je.js",
+      ".next\\static\\chunks\\0drq0zwnlavqb.js",
       ".next\\static\\chunks\\0b5i-yv-ub-pf.js",
       ".next\\static\\chunks\\0pqt~8bl3ukh4.js",
       ".next\\static\\chunks\\07lhk_q6pmm3r.js",
@@ -49,12 +49,12 @@
   },
   {
     "route": "/auto-editing",
-    "firstLoadUncompressedJsBytes": 615853,
+    "firstLoadUncompressedJsBytes": 615769,
     "firstLoadChunkPaths": [
       ".next\\static\\chunks\\0-5kj8m5lcbft.js",
       ".next\\static\\chunks\\0d3shmwh5_nmn.js",
       ".next\\static\\chunks\\10vuyll1b_-~-.js",
-      ".next\\static\\chunks\\152udihcl16ke.js",
+      ".next\\static\\chunks\\0hi27ssk1~b8~.js",
       ".next\\static\\chunks\\0usbhpozr2z90.js",
       ".next\\static\\chunks\\0b5i-yv-ub-pf.js",
       ".next\\static\\chunks\\0pqt~8bl3ukh4.js",

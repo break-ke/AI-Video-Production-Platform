@@ -225,21 +225,37 @@ export default function CompetitiveResearchPage() {
                 ))}
               </div>
 
-              {/* Hook details + video preview */}
-              <div className="grid grid-cols-2 gap-4">
-                {sel.basicInfo?.hookKeyElements && (
-                  <Card className="shadow-card border-l-[3px] border-l-[var(--color-destructive)]"><CardContent className="p-4">
-                    <p className="text-xs font-medium text-zinc-500 mb-1 flex items-center gap-1"><Zap className="size-3" />开场0.3秒关键元素</p>
-                    <p className="text-[13px]">{sel.basicInfo.hookKeyElements}</p>
-                  </CardContent></Card>
-                )}
-                <Card className="shadow-card border-l-[3px] border-l-[var(--color-primary)]"><CardContent className="p-4">
-                  <p className="text-xs font-medium text-zinc-500 mb-1 flex items-center gap-1"><Globe className="size-3" />竞品链接</p>
-                  <a href={sel.competitorLink} target="_blank" rel="noopener" className="text-[13px] text-[var(--color-primary)] hover:underline flex items-center gap-1">
-                    {sel.competitorLink} <ExternalLink className="size-3" />
-                  </a>
-                  {sel.basicInfo?.duration && <p className="text-xs text-zinc-500 mt-1">视频时长：{sel.basicInfo.duration}</p>}
+              {/* Hook details */}
+              {sel.basicInfo?.hookKeyElements && (
+                <Card className="shadow-card border-l-[3px] border-l-[var(--color-destructive)]"><CardContent className="p-4">
+                  <p className="text-xs font-medium text-zinc-500 mb-1 flex items-center gap-1"><Zap className="size-3" />开场0.3秒关键元素</p>
+                  <p className="text-[13px]">{sel.basicInfo.hookKeyElements}</p>
                 </CardContent></Card>
+              )}
+
+              {/* Embedded competitor page + video */}
+              <div className="grid grid-cols-1 gap-3">
+                {(videoUrl || sel.competitorLink) && (
+                  <Card className="shadow-card overflow-hidden">
+                    <CardContent className="p-0">
+                      <div className="bg-black aspect-video flex items-center justify-center">
+                        {videoUrl ? (
+                          <video src={videoUrl} controls className="w-full h-full" preload="metadata">
+                            您的浏览器不支持视频播放
+                          </video>
+                        ) : (
+                          <iframe src={sel.competitorLink} className="w-full h-full border-0" sandbox="allow-same-origin allow-scripts" title="竞品页面" loading="lazy" />
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+                <div className="flex items-center gap-2 text-xs text-zinc-500">
+                  <Globe className="size-3" />
+                  <span>源站：</span>
+                  <a href={sel.competitorLink} target="_blank" rel="noopener" className="text-[var(--color-primary)] hover:underline">{sel.competitorLink}</a>
+                  {sel.basicInfo?.duration && <span className="ml-auto">视频时长：{sel.basicInfo.duration}</span>}
+                </div>
               </div>
 
               <Tabs defaultValue="shots">
@@ -266,13 +282,19 @@ export default function CompetitiveResearchPage() {
                           return (
                           <tr key={i} className="border-b hover:bg-zinc-50/50 align-top group">
                             <td className="p-2 text-center font-mono font-bold">{shot.shotNumber}</td>
-                            <td className="p-2">
+                            <td className="p-2 w-[120px]">
                               {clipUrl ? (
-                                <video src={clipUrl} controls className="w-[100px] h-auto rounded" preload="metadata" title={`分镜${shot.shotNumber} ${shot.timeCode}`} />
+                                <video src={clipUrl} controls muted className="w-[110px] h-auto rounded" preload="auto" playsInline />
+                              ) : videoUrl ? (
+                                <video
+                                  src={`${videoUrl}#t=${seekSeconds}`}
+                                  controls muted className="w-[110px] h-auto rounded" preload="metadata" playsInline
+                                  onLoadedMetadata={(e) => { const v = e.currentTarget; v.currentTime = seekSeconds; }}
+                                />
                               ) : (
-                                <a href={`${sel.competitorLink}#t=${seekSeconds}`} target="_blank" rel="noopener" className="flex items-center gap-1 text-[var(--color-primary)] hover:underline">
-                                  <Play className="size-3" /> 查看视频
-                                </a>
+                                <div className="w-[110px] h-[62px] bg-zinc-100 rounded flex items-center justify-center">
+                                  <Film className="size-5 text-zinc-300" />
+                                </div>
                               )}
                             </td>
                             <td className="p-2 font-mono whitespace-nowrap">{shot.timeCode}</td>
