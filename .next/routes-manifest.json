@@ -54,6 +54,12 @@
       "namedRegex": "^/api/competitive\\-research(?:/)?$"
     },
     {
+      "page": "/api/competitive-research/analyze",
+      "regex": "^/api/competitive\\-research/analyze(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/competitive\\-research/analyze(?:/)?$"
+    },
+    {
       "page": "/api/feedback",
       "regex": "^/api/feedback(?:/)?$",
       "routeKeys": {},

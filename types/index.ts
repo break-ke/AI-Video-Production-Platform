@@ -77,6 +77,8 @@ export interface CompetitiveResearch {
   // 五、总结与可复制建议
   summary: string;
   replicableElements: string[];
+  // Video clips (shotNumber → clipUrl)
+  clipMap?: Record<number, string>;
   // Metadata
   creator: string;
   createdAt: string;

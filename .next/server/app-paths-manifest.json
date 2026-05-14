@@ -2,6 +2,7 @@
   "/_global-error/page": "app/_global-error/page.js",
   "/_not-found/page": "app/_not-found/page.js",
   "/api/auto-editing/route": "app/api/auto-editing/route.js",
+  "/api/competitive-research/analyze/route": "app/api/competitive-research/analyze/route.js",
   "/api/competitive-research/route": "app/api/competitive-research/route.js",
   "/api/feedback/route": "app/api/feedback/route.js",
   "/api/feishu/test/route": "app/api/feishu/test/route.js",

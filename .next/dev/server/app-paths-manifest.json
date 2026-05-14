@@ -1,5 +1,6 @@
 {
   "/api/auto-editing/route": "app/api/auto-editing/route.js",
+  "/api/competitive-research/analyze/route": "app/api/competitive-research/analyze/route.js",
   "/api/competitive-research/route": "app/api/competitive-research/route.js",
   "/api/feedback/route": "app/api/feedback/route.js",
   "/api/lingke/test/route": "app/api/lingke/test/route.js",

@@ -76,34 +76,63 @@ export default function CompetitiveResearchPage() {
     setAdding(true); setErr("");
     setProgressVisible(true); setProgressStep(0);
 
-    // Start progress animation
-    const progressTimer = setInterval(() => {
-      setProgressStep(prev => {
-        if (prev >= ANALYSIS_STEPS.length - 1) {
-          clearInterval(progressTimer);
-          return prev;
-        }
-        return prev + 1;
-      });
-    }, 800);
-
     try {
       const body: Record<string, string> = { url };
       if (videoUrl) body.videoUrl = videoUrl;
-      const r = await fetch("/api/competitive-research", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-      const j = await r.json();
-      clearInterval(progressTimer);
-      if (j.success) {
-        setProgressStep(ANALYSIS_STEPS.length);
-        // Brief delay to show all checkmarks
-        setTimeout(() => {
-          setData(d => [j.data, ...d]);
-          setShowAdd(false); setUrl(""); setVideoUrl(""); setVideoFile(null);
-          setProgressVisible(false); setProgressStep(0);
-        }, 600);
-      } else {
-        setErr(j.error);
+
+      // Use SSE for real progress
+      const res = await fetch("/api/competitive-research/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        setErr("分析请求失败");
         setProgressVisible(false);
+        return;
+      }
+
+      const reader = res.body?.getReader();
+      if (!reader) { setErr("无法读取响应流"); setProgressVisible(false); return; }
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          try {
+            const evt = JSON.parse(line.slice(6));
+            if (evt.step === "done") {
+              // Final result
+              const result = JSON.parse(evt.detail);
+              if (result.success) {
+                setData(d => [result.data, ...d]);
+                setProgressStep(ANALYSIS_STEPS.length);
+                setTimeout(() => {
+                  setShowAdd(false); setUrl(""); setVideoUrl(""); setVideoFile(null);
+                  setProgressVisible(false); setProgressStep(0);
+                }, 800);
+              }
+            } else if (evt.step === "error") {
+              setErr(evt.detail || "分析失败");
+            } else {
+              // Update progress step
+              const idx = ANALYSIS_STEPS.findIndex(s => s.key === evt.step);
+              if (idx >= 0 && evt.status === "completed") {
+                setProgressStep(Math.max(progressStep, idx + 1));
+              }
+            }
+          } catch { /* skip malformed events */ }
+        }
       }
     } catch { setErr("网络错误"); setProgressVisible(false); }
     finally { setAdding(false); }
@@ -226,33 +255,31 @@ export default function CompetitiveResearchPage() {
                   <Card className="shadow-card"><CardContent className="p-0 overflow-x-auto">
                     <table className="w-full text-[12px]">
                       <thead><tr className="border-b bg-zinc-50">
-                        <th className="p-2 text-center w-10">#</th><th className="p-2 text-left w-[90px]">
-                          <span className="flex items-center gap-1 cursor-pointer hover:text-[var(--color-primary)]" onClick={() => window.open(sel.competitorLink, "_blank")}>时间 <Play className="size-3" /></span>
-                        </th><th className="p-2 text-left">时长</th><th className="p-2 text-center">景别</th><th className="p-2 text-left">运镜</th><th className="p-2 text-left">画面内容</th><th className="p-2 text-left">光线</th><th className="p-2 text-left">人物动作</th><th className="p-2 text-left">产品位置</th><th className="p-2 text-left">字幕</th><th className="p-2 text-left">节奏</th><th className="p-2 text-left w-32">消费心理学</th><th className="p-2 text-left w-40">黄金15帧</th><th className="p-2 text-center">复刻</th>
+                        <th className="p-2 text-center w-10">#</th><th className="p-2 text-left w-[110px]">视频片段</th><th className="p-2 text-left w-[90px]">时间</th><th className="p-2 text-left">时长</th><th className="p-2 text-center">景别</th><th className="p-2 text-left">运镜</th><th className="p-2 text-left">画面内容</th><th className="p-2 text-left">节奏</th><th className="p-2 text-left w-32">消费心理学</th><th className="p-2 text-left w-40">黄金15帧</th><th className="p-2 text-center">复刻</th>
                       </tr></thead>
                       <tbody>
                         {sel.shots?.map((shot, i) => {
-                          // Parse timecode to generate video seek URL
+                          const clipUrl = sel.clipMap?.[shot.shotNumber];
                           const tc = shot.timeCode || "";
                           const startMatch = tc.match(/(\d+):(\d+)/);
                           const seekSeconds = startMatch ? parseInt(startMatch[1]) * 60 + parseInt(startMatch[2]) : 0;
-                          const videoLink = `${sel.competitorLink}${sel.competitorLink.includes("#") ? "&" : "#"}t=${seekSeconds}`;
                           return (
                           <tr key={i} className="border-b hover:bg-zinc-50/50 align-top group">
                             <td className="p-2 text-center font-mono font-bold">{shot.shotNumber}</td>
-                            <td className="p-2 font-mono whitespace-nowrap">
-                              <a href={videoLink} target="_blank" rel="noopener" title="点击跳转到此时间点" className="text-[var(--color-primary)] hover:underline flex items-center gap-1">
-                                <Play className="size-3 inline opacity-0 group-hover:opacity-100 transition-opacity" />{shot.timeCode}
-                              </a>
+                            <td className="p-2">
+                              {clipUrl ? (
+                                <video src={clipUrl} controls className="w-[100px] h-auto rounded" preload="metadata" title={`分镜${shot.shotNumber} ${shot.timeCode}`} />
+                              ) : (
+                                <a href={`${sel.competitorLink}#t=${seekSeconds}`} target="_blank" rel="noopener" className="flex items-center gap-1 text-[var(--color-primary)] hover:underline">
+                                  <Play className="size-3" /> 查看视频
+                                </a>
+                              )}
                             </td>
+                            <td className="p-2 font-mono whitespace-nowrap">{shot.timeCode}</td>
                             <td className="p-2 whitespace-nowrap">{shot.duration}</td>
                             <td className="p-2 text-center"><Badge variant="outline" className="text-[10px]">{shot.shotSize}</Badge></td>
                             <td className="p-2 text-zinc-600">{shot.cameraMovement}</td>
                             <td className="p-2 max-w-[200px]">{shot.visualContent}</td>
-                            <td className="p-2 text-zinc-600 text-[11px]">{shot.lighting}</td>
-                            <td className="p-2 text-zinc-600 text-[11px] max-w-[150px]">{shot.characterAction}</td>
-                            <td className="p-2 text-zinc-600 text-[11px]">{shot.productPosition}</td>
-                            <td className="p-2 text-zinc-600 text-[11px] max-w-[200px]">{shot.subtitle}</td>
                             <td className="p-2 text-zinc-600 text-[11px]">{shot.rhythm}</td>
                             <td className="p-2 text-[11px]">{shot.consumerPsychology}</td>
                             <td className="p-2 text-[11px]">{shot.golden15Frames}</td>

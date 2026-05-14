@@ -2,6 +2,7 @@
   "/_global-error/page": "/_global-error",
   "/_not-found/page": "/_not-found",
   "/api/auto-editing/route": "/api/auto-editing",
+  "/api/competitive-research/analyze/route": "/api/competitive-research/analyze",
   "/api/competitive-research/route": "/api/competitive-research",
   "/api/feedback/route": "/api/feedback",
   "/api/feishu/test/route": "/api/feishu/test",
