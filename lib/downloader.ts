@@ -3,81 +3,57 @@ import path from "path";
 
 const DOWNLOAD_DIR = path.join(process.cwd(), "public", "clips");
 
-export async function downloadVideoFromUrl(pageUrl: string, taskId: string): Promise<string | null> {
-  await mkdir(DOWNLOAD_DIR, { recursive: true });
+async function fetchDirectVideo(url: string): Promise<string | null> {
+  // Direct video URL
+  if (/\.(mp4|mov|webm|avi)(\?|$)/i.test(url)) {
+    return url;
+  }
 
-  // Strategy 1: Look for og:video meta tag
+  // Try to find video in page meta
   try {
-    const res = await fetch(pageUrl, {
+    const res = await fetch(url, {
       headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
       redirect: "follow",
     });
     const html = await res.text();
 
-    // Try og:video meta
-    const ogVideo = html.match(/<meta[^>]+property="og:video"[^>]+content="([^"]*)"/i);
-    if (ogVideo?.[1]) {
-      return await downloadFile(ogVideo[1], taskId, "mp4");
-    }
+    // Check og:video meta
+    const og = html.match(/<meta[^>]+property="og:video(?::secure_url)?"[^>]+content="([^"]*)"/i);
+    if (og?.[1]) return og[1];
 
-    // Try video tag source
-    const videoSrc = html.match(/<source[^>]+src="([^"]*\.mp4[^"]*)"/i)
-      || html.match(/<video[^>]+src="([^"]*\.mp4[^"]*)"/i);
-    if (videoSrc?.[1]) {
-      return await downloadFile(videoSrc[1], taskId, "mp4");
-    }
+    // Check twitter:player:stream
+    const tw = html.match(/<meta[^>]+name="twitter:player:stream"[^>]+content="([^"]*)"/i);
+    if (tw?.[1]) return tw[1];
 
-    // Try JSON-LD video
-    const jsonLdMatch = html.match(/<script[^>]+type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/i);
-    if (jsonLdMatch?.[1]) {
-      try {
-        const ld = JSON.parse(jsonLdMatch[1]);
-        const v = ld?.video || ld?.["@graph"]?.find((g: Record<string, unknown>) => g["@type"] === "VideoObject");
-        if (v?.contentUrl) return await downloadFile(v.contentUrl, taskId, "mp4");
-      } catch { /* not JSON */ }
-    }
+    // Check video source tags
+    const v = html.match(/<source[^>]+src="([^"]+\.mp4[^"]*)"/i);
+    if (v?.[1]) return v[1];
 
-    // Strategy 2: Direct download if URL ends with video extension
-    if (/\.(mp4|mov|webm)(\?|$)/i.test(pageUrl)) {
-      return await downloadFile(pageUrl, taskId, path.extname(pageUrl).replace("?", ""));
-    }
-
-  } catch (e) {
-    console.error("Video discovery failed:", (e as Error).message);
-  }
-
-  // Strategy 3: Try yt-dlp if available
-  try {
-    const { execSync } = await import("child_process");
-    const ext = "mp4";
-    const outPath = path.join(DOWNLOAD_DIR, `${taskId}_source.${ext}`);
-    execSync(`yt-dlp -f "best[ext=${ext}]/best" -o "${outPath}" "${pageUrl}" --max-filesize 100M --no-playlist`, {
-      timeout: 120000,
-      stdio: "pipe",
-    });
-    return outPath;
-  } catch {
-    /* yt-dlp not available or failed */
-  }
+  } catch { /* ignore */ }
 
   return null;
 }
 
-async function downloadFile(url: string, taskId: string, ext: string): Promise<string | null> {
+export async function downloadVideoFromUrl(pageUrl: string, taskId: string): Promise<string | null> {
+  await mkdir(DOWNLOAD_DIR, { recursive: true });
+
+  const videoUrl = await fetchDirectVideo(pageUrl);
+  if (!videoUrl) return null;
+
   try {
-    const fileName = `${taskId}_source.${ext}`;
+    const fileName = `${taskId}_source.mp4`;
     const outPath = path.join(DOWNLOAD_DIR, fileName);
-    const res = await fetch(url, {
+
+    const res = await fetch(videoUrl, {
       headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
     });
     if (!res.ok) return null;
 
     const buf = Buffer.from(await res.arrayBuffer());
+    if (buf.length < 10240) return null;
+
     await writeFile(outPath, buf);
-
-    if (buf.length < 1024) return null;
-
-    // Return HTTP-accessible path
+    console.log(`[Downloader] Downloaded ${(buf.length / 1024 / 1024).toFixed(1)}MB → ${fileName}`);
     return `/clips/${fileName}`;
   } catch {
     return null;

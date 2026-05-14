@@ -32,15 +32,34 @@ function parseTimeCode(tc: string): { start: number; end: number } {
 
 export async function downloadVideo(videoUrl: string, taskId: string): Promise<string> {
   await mkdir(CLIPS_DIR, { recursive: true });
+
+  // Handle local file paths (from /uploads/ or /clips/)
+  if (videoUrl.startsWith("/")) {
+    const localPath = path.join(process.cwd(), "public", videoUrl);
+    try {
+      const { stat } = await import("fs/promises");
+      await stat(localPath);
+      return localPath; // file exists locally, use directly
+    } catch {
+      // file doesn't exist locally, try HTTP download from local server
+    }
+  }
+
   const ext = videoUrl.includes(".mp4") ? "mp4" : videoUrl.includes(".webm") ? "webm" : "mp4";
   const videoPath = path.join(CLIPS_DIR, `${taskId}_source.${ext}`);
 
-  // Download using curl
+  // Download using fetch
   try {
-    await execAsync(`curl -sL -o "${videoPath}" "${videoUrl}" --max-time 120`, { timeout: 130000 });
+    const fullUrl = videoUrl.startsWith("/") ? `http://localhost:3000${videoUrl}` : videoUrl;
+    const res = await fetch(fullUrl, {
+      headers: { "User-Agent": "Mozilla/5.0" },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (buf.length < 1024) throw new Error("File too small");
+    await writeFile(videoPath, buf);
     return videoPath;
   } catch (e) {
-    // If download fails, try a HEAD request to check accessibility
     console.error("Video download failed:", (e as Error).message);
     return "";
   }

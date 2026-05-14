@@ -1,19 +1,5 @@
 {
-  "/api/auto-editing/route": "app/api/auto-editing/route.js",
-  "/api/competitive-research/analyze/route": "app/api/competitive-research/analyze/route.js",
   "/api/competitive-research/route": "app/api/competitive-research/route.js",
-  "/api/feedback/route": "app/api/feedback/route.js",
-  "/api/lingke/test/route": "app/api/lingke/test/route.js",
-  "/api/model-adaptation/route": "app/api/model-adaptation/route.js",
-  "/api/one-click-replicate/route": "app/api/one-click-replicate/route.js",
-  "/api/script-iteration/route": "app/api/script-iteration/route.js",
-  "/api/storyboard/route": "app/api/storyboard/route.js",
-  "/auto-editing/page": "app/auto-editing/page.js",
   "/competitive-research/page": "app/competitive-research/page.js",
-  "/feedback/page": "app/feedback/page.js",
-  "/model-adaptation/page": "app/model-adaptation/page.js",
-  "/one-click-replicate/page": "app/one-click-replicate/page.js",
-  "/page": "app/page.js",
-  "/script-iteration/page": "app/script-iteration/page.js",
-  "/storyboard/page": "app/storyboard/page.js"
+  "/page": "app/page.js"
 }
