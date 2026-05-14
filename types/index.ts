@@ -1,59 +1,62 @@
-// ---- E-Commerce Competitive Analysis Model ----
+// ---- TikTok Video Commercial Analysis Model ----
 
-export interface FeatureComparisonItem {
-  feature: string;           // 功能点
-  competitor: string;        // 竞品表现
-  ours: string;             // 我方表现
-  advantage: "competitor" | "ours" | "tie"; // 谁占优
+export interface VideoBasicInfo {
+  duration: string;            // 完整时长
+  category: string;            // 品类（精确到子品类）
+  videoType: string;           // 口播/演示/开箱/对比/剧情/ASMR/混剪
+  hookType: string;            // 开场钩子类型
+  hookKeyElements: string;     // 开场0.3秒画面关键词
+  ctaType: string;             // 结尾CTA类型
 }
 
-export interface ProductPositioning {
-  priceRange: string;        // 价格区间
-  targetUsers: string[];     // 目标用户群
-  coreValueProp: string;     // 核心价值主张
-  marketSegment: string;     // 细分市场定位
-  pricingModel: string;      // 定价模式（订阅/买断/按量）
+export interface VideoShot {
+  shotNumber: number;          // 分镜#
+  timeCode: string;            // 时间码
+  duration: string;            // 时长
+  shotSize: string;            // ECU/CU/MCU/MS/FS
+  cameraMovement: string;      // Dolly In/Out, Pan, Tilt, etc.
+  visualContent: string;       // 画面内容
+  lighting: string;            // 主光+补光+色温
+  characterAction: string;     // 身体动作+表情+眼神+微表情
+  productPosition: string;     // 产品在画面中的位置
+  subtitle: string;            // 字幕：原文+时机+动画+颜色+大小+位置
+  rhythm: string;              // 节奏感：变化速度+节奏定位
+  consumerPsychology: string;  // 消费心理学效应
+  golden15Frames: string;      // 黄金15帧分析
+  replicabilityScore: number;  // 可复制性指数 1-5
+  replicationKey: string;      // 复刻要点
 }
 
-export interface ContentStrategy {
-  primaryPlatforms: string[];    // 主要发布平台
-  contentTypes: string[];        // 内容类型（教程/测评/案例/产品演示）
-  avgDuration: string;           // 平均视频时长
-  postingFrequency: string;      // 发布频率
-  engagementLevel: string;       // 互动水平（高/中/低）
-  topPerformingTopics: string[]; // 表现最好的内容主题
+export interface PsychologyWeapon {
+  name: string;                // 心理学武器名称
+  timeRange: string;           // 时间段
+  intensity: number;           // 强度 1-10
+  description: string;         // 具体表现
 }
 
-export interface MarketAnalysis {
-  companySize: string;         // 公司规模（初创/成长/成熟/巨头）
-  estimatedMarketShare: string; // 预估市场份额
-  growthTrend: string;          // 增长趋势（上升/平稳/下降）
-  primaryRegions: string[];     // 主要市场区域
-  competitorType: string;       // 竞争类型（直接/间接/替代品）
+export interface PurchaseDecisionPath {
+  attention: string;           // 注意阶段
+  interest: string;            // 兴趣阶段
+  desire: string;              // 渴望阶段
+  trust: string;               // 信任阶段
+  action: string;              // 行动阶段
 }
 
-export interface SWOTItem {
-  strengths: string[];     // 竞品优势
-  weaknesses: string[];    // 竞品劣势
-  opportunities: string[]; // 我方机会
-  threats: string[];       // 对我方威胁
-}
-
-export interface VideoShotBreakdown {
+export interface RhythmIntensityRow {
   timeRange: string;
-  shotType: string;
-  visualDescription: string;
-  intent: string;
+  visualIntensity: number;     // 1-5
+  emotionIntensity: number;    // 1-5
+  infoDensity: number;         // 1-5
+  productAppearance: string;   // 产品出现时间
+  rhythmPosition: string;      // 节奏定位
 }
 
-export interface ReferencedVideo {
-  title: string;
-  url: string;
-  platform: string;
-  views: number;
-  likes: number;
-  duration: number; // seconds
-  summary: string;  // what this video demonstrates
+export interface RhythmCurveAnalysis {
+  curveShape: string;          // 山峰型/波浪型/阶梯型/脉冲型/平缓直落型
+  peakCount: number;
+  peakTriggers: string[];      // 每个波峰的引爆因素
+  valleyPoints: string[];      // 波谷位置
+  editingStats: string;        // 平均镜长、最长镜、最短镜、镜头数
 }
 
 export interface CompetitiveResearch {
@@ -61,19 +64,19 @@ export interface CompetitiveResearch {
   competitorName: string;
   competitorLink: string;
   industry: string;
-  // Product analysis
-  productDescription: string;
-  productPositioning: ProductPositioning;
-  features: FeatureComparisonItem[];
-  // Market analysis
-  marketAnalysis: MarketAnalysis;
-  swot: SWOTItem;
-  // Content strategy
-  contentStrategy: ContentStrategy;
-  referencedVideos: ReferencedVideo[];
-  // AI-generated insights
-  keyInsights: string;          // 核心发现
-  actionableRecommendations: string[]; // 可执行建议
+  // 一、视频基础信息
+  basicInfo: VideoBasicInfo;
+  // 二、逐镜头分镜拆解表
+  shots: VideoShot[];
+  // 三、消费心理学深度分析
+  psychologyWeapons: PsychologyWeapon[];
+  purchaseDecisionPath: PurchaseDecisionPath;
+  // 四、节奏与情绪曲线
+  rhythmIntensity: RhythmIntensityRow[];
+  rhythmCurveAnalysis: RhythmCurveAnalysis;
+  // 五、总结与可复制建议
+  summary: string;
+  replicableElements: string[];
   // Metadata
   creator: string;
   createdAt: string;

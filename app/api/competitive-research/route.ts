@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { competitiveResearch } from "@/lib/store";
-import { analyzeCompetitor } from "@/lib/analyzer";
+import { analyzeVideo } from "@/lib/analyzer";
 
 export async function GET() {
   return NextResponse.json({ success: true, data: competitiveResearch.getAll() });
@@ -12,25 +12,12 @@ export async function POST(req: NextRequest) {
     const { url } = body;
     if (!url) return NextResponse.json({ success: false, error: "缺少竞品链接" }, { status: 400 });
 
-    const analysis = await analyzeCompetitor(url);
+    const analysis = await analyzeVideo(url);
 
     const id = `CR-${Date.now().toString(36).toUpperCase()}`;
     const item = {
+      ...analysis,
       id,
-      competitorName: analysis.competitorName,
-      competitorLink: url,
-      industry: analysis.industry,
-      productDescription: analysis.productDescription,
-      productPositioning: analysis.productPositioning,
-      features: analysis.features,
-      marketAnalysis: analysis.marketAnalysis,
-      swot: analysis.swot,
-      contentStrategy: analysis.contentStrategy,
-      referencedVideos: analysis.referencedVideos,
-      keyInsights: analysis.keyInsights,
-      actionableRecommendations: analysis.actionableRecommendations,
-      creator: "AI电商分析引擎",
-      createdAt: new Date().toISOString(),
     };
     competitiveResearch.add(item);
     return NextResponse.json({ success: true, data: item });

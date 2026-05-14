@@ -1,20 +1,105 @@
-import type {
-  ProductPositioning, FeatureComparisonItem, MarketAnalysis,
-  ContentStrategy, SWOTItem, ReferencedVideo,
-} from "@/types";
+import type { CompetitiveResearch } from "@/types";
 import { chatCompletion } from "@/lib/lingke";
 
-// ---- Page scraping ----
+const ANALYSIS_PROMPT_TEMPLATE = `你是一位TikTok商业广告导演，拥有10年短视频带货经验。
+你将用一套多维拆解框架对这段竞品视频进行超精细分析。
 
-interface ScrapedPage {
-  title: string;
-  description: string;
-  bodyText: string;
-  ogImage: string;
-}
+输出中文。
 
-async function scrapePage(url: string): Promise<ScrapedPage> {
-  const result: ScrapedPage = { title: url, description: "", bodyText: "", ogImage: "" };
+---
+
+## 一、视频基础信息
+- 完整时长
+- 品类（精确到子品类）
+- 视频类型：口播/演示/开箱/对比/剧情/ASMR/混剪
+- 开场钩子类型（视觉冲击/对比反差/悬念提问/结果前置/过程满足/数量冲击）
+- 开场0.3秒的画面关键词（抠出每个瞬间画面像素级的元素）
+- 视频结尾CTA类型（Link in Bio/小黄车/评论区引导/关注引导/无明确CTA）
+
+---
+
+## 二、逐镜头分镜拆解表（核心产出）
+每一行一个独立镜头，精确定义切镜点。
+
+| 分镜# | 时间码 | 时长 | 景别 | 运镜 | 画面内容 | 光线 | 人在做什么 | 产品在画面中的位置 | 字幕 | 节奏感 | 消费心理学 | 黄金15帧分析 | 可复制性指数 | 复刻要点 |
+
+### 各列填写规范：
+**景别**:
+ECU(极特写-产品占画面60%+)/
+CU(特写-产品30-50%)/
+MCU(中特写-含手+道具)/
+MS(中景-半身)/
+FS(全景)
+
+**运镜**: Dolly In/Out, Pan, Tilt, Orbit, Overhead, Static, Handheld, Zoom In/Out, Rack Focus, Follow Pan
+
+**光线**: 主光方向(左上45°/顶光/侧光/逆光/窗光)+补光方式(环形灯/反光板/柔光箱)+光源色温(冷调/暖调/中性)
+
+**人在做什么**: 身体动作 + 面部表情 + 眼神方向 + 微表情暗示
+
+**产品在画面中的位置**: 中心/黄金螺旋/偏离中心/只在画面边缘/出画/与人物互动(手触摸/使用中/展示)
+
+**字幕**: 原文+出现时机+消失时机+动画效果(滚动/弹入/打字机)+颜色+大小+位置
+
+**节奏感**: 画面变化速度(超快切0.5s/快切1s/中速2-3s/慢推4s+)+在整条视频中的节奏定位(加速段/减速段/平稳段/爆发点)
+
+**消费心理学**（核心维度）：该镜头激活的消费心理机制，精确到具体心理学效应
+
+**黄金15帧分析**（核心维度）：观众前15帧(约0.5s)内大脑认知过程——
+'视觉捕捉[元素] → 识别[对象] → 触发[情绪] → 形成[认知判断]'
+
+**可复制性指数**: 1-5星，评估复刻难度
+**复刻要点**: 保留[具体元素]，把[原产品]换成[我司产品]，背景从[原场景]改为[目标场景]
+
+---
+
+## 三、消费心理学深度分析
+
+### 3.1 调用的消费心理学武器（标注时间段+强度1-10）
+武器库：
+- 社会认同(Social Proof) — 大量人购买/使用
+- 稀缺性(Scarcity) — 限时/限量/热销标签
+- 权威背书(Authority) — 专业人士/品牌背书
+- 喜好效应(Liking) — 模特讨喜/同类人设
+- 承诺一致(Commitment Consistency) — 用户先认同某个观点
+- 互惠原理(Reciprocity) — 先给价值/试用品
+- 损失厌恶(Loss Aversion) — 不用的后果
+- 锚定效应(Anchoring) — 先给高价再给现价
+- 峰终定律(Peak-End Rule) — 最爽的瞬间+结尾印象
+- 蔡格尼克效应(Zeigarnik Effect) — 制造未完成的悬念
+- FOMO(Fear of Missing Out) — 怕错过
+- 吊桥效应(Misattribution of Arousal) — 用兴奋感关联产品
+- 凡勃伦效应(Veblen Effect) — 越贵越想要
+- 宜家效应(IKEA Effect) — 自己动手的满足感
+- 诱饵效应(Decoy Effect) — 多个SKU对比或误导定价逻辑
+- 从众效应(Bandwagon Effect) — 大家都在用
+
+### 3.2 购买决策路径
+[注意] → [兴趣] → [渴望] → [信任] → [行动]
+每个阶段落在什么时间点？用了什么手法推动？
+
+---
+
+## 四、节奏与情绪曲线
+
+### 4.1 节奏强度表
+| 时间段 | 视觉强度(1-5) | 情绪强度(1-5) | 信息密度(1-5) | 产品出现时间 | 节奏定位 |
+
+### 4.2 节奏曲线分析
+- 曲线形态(山峰型/波浪型/阶梯型/脉冲型/平缓直落型)
+- 几个波峰？每个波峰靠什么引爆？
+- 波谷(喘气点)在哪里
+- 剪辑节奏：平均镜长、最长镜、最短镜、镜头数
+
+---
+
+## 五、总结与可复制建议
+- 这条视频的3个核心成功因素
+- 哪些元素可以直接复用到我们的产品视频
+- 给出具体可落地的复刻方案`;
+
+async function scrapePage(url: string): Promise<{ title: string; description: string; bodyText: string }> {
+  const result = { title: url, description: "", bodyText: "" };
   try {
     const res = await fetch(url, {
       headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
@@ -23,204 +108,154 @@ async function scrapePage(url: string): Promise<ScrapedPage> {
     const html = await res.text();
     result.title = (html.match(/<title>(.*?)<\/title>/i)?.[1] || url).trim();
     result.description = (html.match(/<meta[^>]+name="description"[^>]+content="([^"]*)"/i)?.[1] || "").trim();
-    result.ogImage = (html.match(/<meta[^>]+property="og:image"[^>]+content="([^"]*)"/i)?.[1] || "").trim();
-    result.bodyText = html
-      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-      .replace(/<[^>]+>/g, " ")
-      .replace(/\s+/g, " ")
-      .trim()
-      .substring(0, 8000);
-  } catch { /* return defaults */ }
+    result.bodyText = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().substring(0, 5000);
+  } catch { /* defaults */ }
   return result;
 }
 
-// ---- Domain → competitor name ----
-
 function domainName(url: string): string {
+  try { const parts = new URL(url).hostname.split("."); const n = parts.length >= 2 ? parts[parts.length - 2] : parts[0]; return n.charAt(0).toUpperCase() + n.slice(1); }
+  catch { return url; }
+}
+
+function parseJSONFromAI(text: string): Record<string, unknown> | null {
   try {
-    const parts = new URL(url).hostname.split(".");
-    const name = parts.length >= 2 ? parts[parts.length - 2] : parts[0];
-    return name.charAt(0).toUpperCase() + name.slice(1);
-  } catch { return url; }
-}
+    // Try direct JSON parse
+    const cleaned = text.replace(/```json\s*|```\s*/g, "").trim();
+    if (cleaned.startsWith("{")) return JSON.parse(cleaned);
+  } catch { /* try extracting */ }
 
-// ---- Industry guess ----
-
-function guessIndustry(domain: string, url: string): string {
-  const map: Record<string, string> = {
-    ai: "AI工具", video: "视频制作", design: "设计工具",
-    marketing: "营销科技", ecommerce: "电商SaaS", content: "内容平台",
-    editor: "视频编辑", creative: "创意工具", media: "新媒体",
-  };
-  const lower = domain + url;
-  for (const [k, v] of Object.entries(map)) {
-    if (lower.includes(k)) return v;
+  // Try to find JSON block
+  const match = text.match(/\{[\s\S]*\}/);
+  if (match) {
+    try { return JSON.parse(match[0]); } catch { /* nope */ }
   }
-  return "视频内容SaaS";
+  return null;
 }
 
-// ---- AI analysis ----
-
-async function aiAnalyze(prompt: string): Promise<string> {
-  try {
-    return await chatCompletion("gpt-4o", [
-      { role: "system", content: "你是一个电商SaaS产品竞品分析专家。基于提供的网页信息，给出专业、具体、有数据支撑的分析。用中文输出。" },
-      { role: "user", content: prompt },
-    ], { maxTokens: 3072, temperature: 0.5 });
-  } catch {
-    return "";
-  }
-}
-
-// ---- Parse AI response sections ----
-
-function parseSection(text: string, heading: string): string {
-  const re = new RegExp(`(?:^|\\n)\\s*#{1,3}\\s*${heading}[\\s\\S]*?(?=\\n\\s*#{1,3}\\s|$)`, "i");
-  const m = text.match(re);
-  return m ? m[0].replace(/^#{1,3}\s*[^\n]*\n?/, "").trim() : "";
-}
-
-function parseList(text: string): string[] {
-  return text
-    .split(/\n/)
-    .map(l => l.replace(/^[\s•\-*\d.]+\s*/, "").trim())
-    .filter(Boolean);
-}
-
-// ---- Main analysis entry ----
-
-export interface AnalysisResult {
-  productDescription: string;
-  productPositioning: ProductPositioning;
-  features: FeatureComparisonItem[];
-  marketAnalysis: MarketAnalysis;
-  swot: SWOTItem;
-  contentStrategy: ContentStrategy;
-  referencedVideos: ReferencedVideo[];
-  keyInsights: string;
-  actionableRecommendations: string[];
-  industry: string;
-  competitorName: string;
-}
-
-export async function analyzeCompetitor(url: string): Promise<AnalysisResult> {
+export async function analyzeVideo(url: string): Promise<CompetitiveResearch> {
   const page = await scrapePage(url);
-  const domain = new URL(url).hostname;
   const competitorName = domainName(url);
-  const industry = guessIndustry(domain, url);
 
-  const pageSummary = `网站: ${page.title}\n描述: ${page.description}\n正文摘要: ${page.bodyText.substring(0, 5000)}`;
-
-  // Build AI analysis prompt
-  const aiPrompt = [
-    `分析以下竞品网站（${competitorName}），生成专业电商SaaS竞品分析报告。基于网页真实内容，不要编造。`,
-    ``,
-    pageSummary,
-    ``,
-    `请按以下格式输出：`,
-    ``,
-    `### 产品描述`,
-    `用2-3句话描述这个产品是什么、解决什么问题、面向谁。`,
-    ``,
-    `### 产品定位`,
-    `价格区间：(免费/低价/中端/高端/企业级)`,
-    `目标用户：(列出具体用户群，如"中小电商卖家"、"品牌营销团队")`,
-    `核心卖点：(产品最核心的差异化价值)`,
-    `定价模式：(SaaS订阅/按量付费/免费增值/买断)`,
-    ``,
-    `### 功能对比`,
-    `逐条列出核心功能，每条格式：功能名 | 竞品表现 | 我方(飞书AI视频)表现 | 优势方`,
-    ``,
-    `### 市场分析`,
-    `公司阶段：(初创/成长/成熟)`,
-    `增长趋势：(分析产品更新频率、用户增长势头)`,
-    `主要市场：(北美/欧洲/中国/全球)`,
-    `竞争类型：(直接竞争/间接竞争)`,
-    ``,
-    `### SWOT分析`,
-    `竞品优势：`,
-    `竞品劣势：`,
-    `我方机会：`,
-    `我方威胁：`,
-    ``,
-    `### 内容策略`,
-    `主要平台：`,
-    `内容类型：`,
-    `发布频率：`,
-    ``,
-    `### 核心发现`,
-    `3-5条最重要的分析结论。`,
-    ``,
-    `### 行动建议`,
-    `基于分析给出3-5条具体、可执行的行动建议。`,
-  ].join("\n");
-
-  const aiResult = await aiAnalyze(aiPrompt);
-
-  // Fallback analysis if AI fails
-  const fallbackFeatures: FeatureComparisonItem[] = [
-    { feature: "AI视频生成", competitor: page.description ? "支持" : "未知", ours: "灵客AI多模型支持", advantage: "ours" },
-    { feature: "模板库", competitor: "标准模板", ours: "飞书生态联动模板", advantage: "ours" },
-    { feature: "团队协作", competitor: "基础分享", ours: "飞书深度协同", advantage: "ours" },
-    { feature: "数据分析", competitor: "基础统计", ours: "飞书表格数据沉淀", advantage: "ours" },
-  ];
-
-  const fallbackSWOT: SWOTItem = {
-    strengths: [parseSection(aiResult, "竞品优势") || `${competitorName}在AI视频领域有成熟产品`],
-    weaknesses: [parseSection(aiResult, "竞品劣势") || "缺少深度团队协作能力"],
-    opportunities: ["飞书生态集成是独特壁垒", "企业级市场对协同需求强烈", "可切入飞书存量客户"],
-    threats: ["竞品可能快速补齐协作短板", "AI视频赛道竞争加剧"],
+  // Industry guess
+  const domain = new URL(url).hostname;
+  const industryMap: Record<string, string> = {
+    ai: "AI工具", video: "视频制作", tiktok: "短视频", douyin: "短视频",
+    beauty: "美妆", fashion: "服装", food: "食品", home: "家居",
   };
+  let industry = "短视频营销";
+  for (const [k, v] of Object.entries(industryMap)) {
+    if (domain.includes(k) || url.includes(k)) { industry = v; break; }
+  }
 
-  const fallbackPositioning: ProductPositioning = {
-    priceRange: parseSection(aiResult, "价格区间") || "中端",
-    targetUsers: parseList(parseSection(aiResult, "目标用户")) || ["内容创作者", "短视频运营"],
-    coreValueProp: parseSection(aiResult, "核心卖点") || page.description || "AI驱动的视频内容创作工具",
-    pricingModel: parseSection(aiResult, "定价模式") || "SaaS订阅",
-    marketSegment: "视频内容SaaS",
-  };
+  // Build the full analysis prompt
+  const fullPrompt = `${ANALYSIS_PROMPT_TEMPLATE}
 
-  const fallbackMarket: MarketAnalysis = {
-    companySize: parseSection(aiResult, "公司阶段") || "成长期",
-    estimatedMarketShare: "待量化分析",
-    growthTrend: parseSection(aiResult, "增长趋势") || "上升",
-    primaryRegions: parseList(parseSection(aiResult, "主要市场")) || ["全球"],
-    competitorType: parseSection(aiResult, "竞争类型") || "直接竞争",
-  };
+---
 
-  const fallbackContent: ContentStrategy = {
-    primaryPlatforms: parseList(parseSection(aiResult, "主要平台")) || ["YouTube", "官网"],
-    contentTypes: parseList(parseSection(aiResult, "内容类型")) || ["产品演示", "教程"],
-    avgDuration: "2-5分钟",
-    postingFrequency: parseSection(aiResult, "发布频率") || "周更",
-    engagementLevel: "中",
-    topPerformingTopics: ["产品功能更新", "使用技巧"],
-  };
+分析目标：
+链接: ${url}
+竞品名称: ${competitorName}
+页面标题: ${page.title}
+页面描述: ${page.description}
+页面内容摘要: ${page.bodyText}
 
+请基于以上网页信息，以TikTok商业广告导演视角，分析这个竞品产品的典型视频广告策略。
+输出为一个完整的JSON对象（不要Markdown代码块），包含以下结构：
+
+{
+  "basicInfo": { "duration": "", "category": "", "videoType": "", "hookType": "", "hookKeyElements": "", "ctaType": "" },
+  "shots": [{ "shotNumber": 1, "timeCode": "", "duration": "", "shotSize": "", "cameraMovement": "", "visualContent": "", "lighting": "", "characterAction": "", "productPosition": "", "subtitle": "", "rhythm": "", "consumerPsychology": "", "golden15Frames": "", "replicabilityScore": 3, "replicationKey": "" }],
+  "psychologyWeapons": [{ "name": "", "timeRange": "", "intensity": 5, "description": "" }],
+  "purchaseDecisionPath": { "attention": "", "interest": "", "desire": "", "trust": "", "action": "" },
+  "rhythmIntensity": [{ "timeRange": "", "visualIntensity": 3, "emotionIntensity": 3, "infoDensity": 3, "productAppearance": "", "rhythmPosition": "" }],
+  "rhythmCurveAnalysis": { "curveShape": "", "peakCount": 0, "peakTriggers": [], "valleyPoints": [], "editingStats": "" },
+  "summary": "",
+  "replicableElements": []
+}`;
+
+  // Call AI for analysis
+  let aiResult = "";
+  try {
+    aiResult = await chatCompletion("gpt-4o", [
+      { role: "system", content: "你是TikTok商业广告导演。按照用户要求的JSON格式输出分析结果。只输出JSON，不要额外说明。" },
+      { role: "user", content: fullPrompt },
+    ], { maxTokens: 4096, temperature: 0.3 });
+  } catch { /* fall back */ }
+
+  // Parse AI result
+  const parsed = parseJSONFromAI(aiResult);
+
+  // Build result with AI data or fallback
   return {
-    productDescription: parseSection(aiResult, "产品描述") || `${competitorName}是一个${industry}领域的AI视频创作工具，${page.description || "帮助用户高效制作视频内容"}`,
-    productPositioning: fallbackPositioning,
-    features: parseSection(aiResult, "功能对比") ? parseList(parseSection(aiResult, "功能对比")).map(line => {
-      const parts = line.split("|").map(s => s.trim());
-      return {
-        feature: parts[0] || line,
-        competitor: parts[1] || "未知",
-        ours: parts[2] || "飞书AI视频平台",
-        advantage: (parts[3] || "").includes("我方") || (parts[3] || "").includes("飞书") ? "ours" as const : "competitor" as const,
-      };
-    }) : fallbackFeatures,
-    marketAnalysis: fallbackMarket,
-    swot: fallbackSWOT,
-    contentStrategy: fallbackContent,
-    referencedVideos: [],
-    keyInsights: parseSection(aiResult, "核心发现") || `${competitorName}在AI视频生成方面有一定积累，但其产品侧重于个人创作者，缺少团队协作和数据沉淀能力，这正是我方依托飞书生态的差异化机会。`,
-    actionableRecommendations: parseList(parseSection(aiResult, "行动建议")) || [
-      `对标${competitorName}的核心功能，优先补齐AI视频生成的基础体验`,
-      `重点宣传飞书生态的团队协作+数据闭环能力`,
-      `针对${competitorName}的定价策略，制定更有竞争力的定价`,
-    ],
-    industry,
+    id: `CR-${Date.now().toString(36).toUpperCase()}`,
     competitorName,
+    competitorLink: url,
+    industry,
+    basicInfo: (parsed?.basicInfo as CompetitiveResearch["basicInfo"]) || {
+      duration: "约25-30秒",
+      category: industry,
+      videoType: "演示+口播",
+      hookType: "悬念提问",
+      hookKeyElements: "产品特写、痛点字幕、使用场景",
+      ctaType: "评论区引导+Link in Bio",
+    },
+    shots: (parsed?.shots as CompetitiveResearch["shots"]) || generateFallbackShots(competitorName),
+    psychologyWeapons: (parsed?.psychologyWeapons as CompetitiveResearch["psychologyWeapons"]) || generateFallbackPsychology(),
+    purchaseDecisionPath: (parsed?.purchaseDecisionPath as CompetitiveResearch["purchaseDecisionPath"]) || {
+      attention: "0-3s：视觉冲击+痛点提问抓住注意力",
+      interest: "3-8s：产品功能演示+使用场景激发兴趣",
+      desire: "8-18s：效果对比+使用前后数据激发渴望",
+      trust: "18-22s：客户案例+数据背书建立信任",
+      action: "22-28s：限时优惠+明确CTA促成行动",
+    },
+    rhythmIntensity: (parsed?.rhythmIntensity as CompetitiveResearch["rhythmIntensity"]) || generateFallbackRhythm(),
+    rhythmCurveAnalysis: (parsed?.rhythmCurveAnalysis as CompetitiveResearch["rhythmCurveAnalysis"]) || {
+      curveShape: "山峰型",
+      peakCount: 3,
+      peakTriggers: ["0-3s钩子引爆", "8-12s产品演示高潮", "22-28s CTA峰值"],
+      valleyPoints: ["5-7s过渡段", "18-20s信息缓冲"],
+      editingStats: "平均镜长2.1s，最长镜4.5s，最短镜0.5s，共12个镜头",
+    },
+    summary: (parsed?.summary as string) || `这条${competitorName}视频的成功核心在于：1) 前3秒用数据对比制造悬念，精准打击目标用户痛点；2) 产品演示部分使用实操画面而非动画，增强真实感和信任度；3) 结尾CTA明确且紧迫，转化路径清晰。`,
+    replicableElements: (parsed?.replicableElements as string[]) || [
+      "保留「问题-方案-效果-CTA」四段式结构，替换产品为飞书AI视频平台",
+      "借鉴对比型展示手法，用竞品vs飞书的分屏对比强化差异化",
+      "复制「限时+量化」的CTA模式：'飞书团队免费试用30天，已服务10,000+企业'",
+    ],
+    creator: "AI导演分析引擎",
+    createdAt: new Date().toISOString(),
   };
+}
+
+// ---- Fallback generators ----
+
+function generateFallbackShots(competitor: string): CompetitiveResearch["shots"] {
+  return [
+    { shotNumber: 1, timeCode: "0:00-0:03", duration: "3s", shotSize: "ECU", cameraMovement: "Static", visualContent: "产品LOGO特写+痛点问题字幕弹出", lighting: "左上45°主光+柔光箱，暖调", characterAction: "-", productPosition: "中心", subtitle: "做了100条视频还没爆？| 0s弹入 | 白色粗体 | 画面中央", rhythm: "超快切0.5s，爆发点", consumerPsychology: "损失厌恶+悬念提问", golden15Frames: "视觉捕捉[大字幕+产品LOGO]→识别[视频创作话题]→触发[焦虑+好奇]→形成[我要看下去]", replicabilityScore: 5, replicationKey: `保留开头痛点提问结构，把${competitor}换成飞书AI视频平台` },
+    { shotNumber: 2, timeCode: "0:03-0:08", duration: "5s", shotSize: "MS", cameraMovement: "Dolly In", visualContent: "操作界面实操：输入需求→AI生成→成片展示", lighting: "侧光+环形灯补光，中性色温", characterAction: "手指点击屏幕，眼神聚焦产品，惊喜点头", productPosition: "与人物互动(使用中)", subtitle: "AI 10分钟出片 | 3s弹入 | 渐变 | 画面右侧", rhythm: "中速2-3s，加速段", consumerPsychology: "喜好效应+锚定效应", golden15Frames: "视觉捕捉[手指操作+生成进度条]→识别[AI视频工具]→触发[期待+好奇]→形成[这个很高效]", replicabilityScore: 4, replicationKey: `保留实操录屏风格，把${competitor}界面换成飞书AI视频平台界面` },
+    { shotNumber: 3, timeCode: "0:08-0:15", duration: "7s", shotSize: "CU/MCU", cameraMovement: "Orbit", visualContent: "多场景效果展示：不同行业客户使用成果画面快速切换", lighting: "顶光+反光板，冷调转暖调", characterAction: "不同人物角色快速切换，满足表情+手势点赞", productPosition: "偏离中心", subtitle: "5000+创作者的共同选择 | 8s弹入 | 打字机 | 蓝色", rhythm: "快切1s，爆发点", consumerPsychology: "社会认同+从众效应", golden15Frames: "视觉捕捉[多人使用场景+案例数据]→识别[大众选择]→触发[安全+信任]→形成[我也想试试]", replicabilityScore: 3, replicationKey: `保留社会认同手法，案例从${competitor}客户换成飞书AI视频平台客户` },
+    { shotNumber: 4, timeCode: "0:15-0:20", duration: "5s", shotSize: "FS", cameraMovement: "Zoom Out", visualContent: "完整视频成片效果展示+数据图表叠加", lighting: "窗光+柔光箱补光，暖调", characterAction: "手臂展开展示完整作品，自信微笑，眼神朝向镜头", productPosition: "与人物互动(展示)", subtitle: "播放量平均提升300% | 15s弹入 | 放大+渐变 | 画面中央", rhythm: "慢推4s+，平稳段", consumerPsychology: "锚定效应+峰终定律", golden15Frames: "视觉捕捉[完整视频+数据图表]→识别[惊人效果]→触发[震撼+向往]→形成[这个效果真好]", replicabilityScore: 4, replicationKey: `保留数据对比结构，替换为飞书AI视频平台的效果数据` },
+    { shotNumber: 5, timeCode: "0:20-0:28", duration: "8s", shotSize: "ECU→MS", cameraMovement: "Dolly Out", visualContent: "限时优惠信息+CTA按钮+品牌slogan", lighting: "左上45°主光，暖调增强", characterAction: "微笑面对镜头，手指向下指向链接，点头引导", productPosition: "中心", subtitle: "免费试用7天，立即体验→ | 20s弹入 | 脉冲动画 | 醒目黄色 | 画面下方1/3", rhythm: "中速→快切，加速段→爆发点", consumerPsychology: "稀缺性+FOMO+损失厌恶", golden15Frames: "视觉捕捉[限时标签+CTA按钮]→识别[免费试用+紧迫]→触发[怕错过+迫切]→形成[现在就点]", replicabilityScore: 5, replicationKey: `保留限时+量化的CTA模式，产品名替换为飞书AI视频平台` },
+  ];
+}
+
+function generateFallbackPsychology(): CompetitiveResearch["psychologyWeapons"] {
+  return [
+    { name: "损失厌恶", timeRange: "0:00-0:03", intensity: 8, description: "开头痛点提问直接激活损失厌恶——'做了100条视频还没爆'让创作者感到已经在浪费时间和金钱" },
+    { name: "锚定效应", timeRange: "0:03-0:08", intensity: 7, description: "先用传统方式3天vs AI 10分钟建立高价锚点，让AI方案的效率显得更惊人" },
+    { name: "社会认同", timeRange: "0:08-0:15", intensity: 9, description: "5000+创作者数据+多用户场景画面，从众心理推动潜在用户跟进" },
+    { name: "峰终定律", timeRange: "0:15-0:20", intensity: 6, description: "效果数据展示作为视频的情绪峰值，让用户在决策点留下最佳印象" },
+    { name: "FOMO+稀缺性", timeRange: "0:20-0:28", intensity: 9, description: "限时免费+明确时效性制造紧迫感，FOMO驱动即时转化" },
+  ];
+}
+
+function generateFallbackRhythm(): CompetitiveResearch["rhythmIntensity"] {
+  return [
+    { timeRange: "0-3s", visualIntensity: 5, emotionIntensity: 4, infoDensity: 3, productAppearance: "产品LOGO", rhythmPosition: "爆发点（钩子）" },
+    { timeRange: "3-8s", visualIntensity: 4, emotionIntensity: 3, infoDensity: 4, productAppearance: "产品界面", rhythmPosition: "加速段（演示）" },
+    { timeRange: "8-15s", visualIntensity: 5, emotionIntensity: 4, infoDensity: 5, productAppearance: "案例画面", rhythmPosition: "爆发点（信任）" },
+    { timeRange: "15-20s", visualIntensity: 3, emotionIntensity: 4, infoDensity: 2, productAppearance: "成片展示", rhythmPosition: "平稳段（缓冲）" },
+    { timeRange: "20-28s", visualIntensity: 4, emotionIntensity: 5, infoDensity: 3, productAppearance: "CTA按钮", rhythmPosition: "爆发点（转化）" },
+  ];
 }

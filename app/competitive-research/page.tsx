@@ -10,32 +10,30 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { formatDate } from "@/lib/utils";
 import type { CompetitiveResearch } from "@/types";
 import {
-  Search, Plus, Eye, Trash2, ExternalLink, Loader2, Sparkles,
-  TrendingUp, Target, Shield, Zap, Lightbulb, AlertTriangle,
-  BarChart3, Users, Globe, DollarSign, Check, Minus, ChevronRight,
+  Search, Plus, Eye, Trash2, ExternalLink, Loader2, Sparkles, ChevronRight,
+  Film, Camera, EyeIcon, Brain, Activity, Target, Zap, Lightbulb, Star, TrendingUp, Clock,
 } from "lucide-react";
 
 export default function CompetitiveResearchPage() {
   const [data, setData] = useState<CompetitiveResearch[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<CompetitiveResearch | null>(null);
+  const [s, setS] = useState("");
+  const [sel, setSel] = useState<CompetitiveResearch | null>(null);
   const [showDetail, setShowDetail] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
-  const [newUrl, setNewUrl] = useState("");
+  const [url, setUrl] = useState("");
   const [adding, setAdding] = useState(false);
-  const [error, setError] = useState("");
+  const [err, setErr] = useState("");
 
-  const fetchData = useCallback(async () => {
+  const refresh = useCallback(async () => {
     try { const r = await fetch("/api/competitive-research"); const j = await r.json(); if (j.success) setData(j.data); }
     finally { setLoading(false); }
   }, []);
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { refresh(); }, [refresh]);
 
   const filtered = data.filter(d =>
-    d.competitorName.toLowerCase().includes(search.toLowerCase()) ||
-    d.industry.includes(search) ||
-    d.productDescription?.includes(search)
+    d.competitorName.toLowerCase().includes(s.toLowerCase()) ||
+    d.industry.includes(s)
   );
 
   const handleDelete = async (id: string) => {
@@ -44,71 +42,55 @@ export default function CompetitiveResearchPage() {
   };
 
   const handleAdd = async () => {
-    if (!newUrl) return;
-    setAdding(true); setError("");
+    if (!url) return;
+    setAdding(true); setErr("");
     try {
-      const r = await fetch("/api/competitive-research", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: newUrl }) });
+      const r = await fetch("/api/competitive-research", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) });
       const j = await r.json();
-      if (j.success) { setData(d => [j.data, ...d]); setShowAdd(false); setNewUrl(""); }
-      else setError(j.error);
-    } catch { setError("网络错误"); }
+      if (j.success) { setData(d => [j.data, ...d]); setShowAdd(false); setUrl(""); }
+      else setErr(j.error);
+    } catch { setErr("网络错误"); }
     finally { setAdding(false); }
   };
 
-  const featColor = (a: string) => a === "ours" ? "text-emerald-600" : a === "competitor" ? "text-orange-600" : "text-zinc-400";
-
   return (
     <div className="space-y-6 max-w-[1440px]">
-      {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-[22px] font-semibold tracking-tight">竞品调研</h1>
-          <p className="text-[13px] text-[var(--color-muted-foreground)] mt-0.5">输入竞品链接，AI自动完成产品定位、功能对比、SWOT分析</p>
-        </div>
+        <div><h1 className="text-[22px] font-semibold tracking-tight">竞品视频调研</h1><p className="text-[13px] text-[var(--color-muted-foreground)] mt-0.5">TikTok商业广告导演视角 · 多维精细拆解 · 消费心理学分析</p></div>
         <Button onClick={() => setShowAdd(true)} className="h-9 text-[13px]"><Plus className="size-4 mr-1.5" />新建调研</Button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { l: "调研报告", v: data.length, icon: BarChart3 },
-          { l: "直接竞品", v: data.filter(d => d.marketAnalysis?.competitorType === "直接竞争").length, icon: Target },
-          { l: "覆盖行业", v: new Set(data.map(d => d.industry)).size, icon: Globe },
-          { l: "行动建议", v: data.reduce((s, d) => s + (d.actionableRecommendations?.length || 0), 0), icon: Lightbulb },
-        ].map(s => (
-          <Card key={s.l} className="shadow-card"><CardContent className="p-4 flex items-center gap-3">
-            <div className="size-9 rounded-lg bg-zinc-100 flex items-center justify-center"><s.icon className="size-4 text-zinc-500" /></div>
-            <div><p className="text-xl font-semibold tabular-nums">{s.v}</p><p className="text-xs text-[var(--color-muted-foreground)]">{s.l}</p></div>
-          </CardContent></Card>
+          { l: "调研报告", v: data.length, icon: Film },
+          { l: "分析镜头", v: data.reduce((x, d) => x + (d.shots?.length || 0), 0), icon: Camera },
+          { l: "心理学武器", v: data.reduce((x, d) => x + (d.psychologyWeapons?.length || 0), 0), icon: Brain },
+          { l: "复刻元素", v: data.reduce((x, d) => x + (d.replicableElements?.length || 0), 0), icon: Lightbulb },
+        ].map(m => (
+          <Card key={m.l} className="shadow-card"><CardContent className="p-4 flex items-center gap-3"><div className="size-9 rounded-lg bg-zinc-100 flex items-center justify-center"><m.icon className="size-4 text-zinc-500" /></div><div><p className="text-xl font-semibold tabular-nums">{m.v}</p><p className="text-xs text-zinc-500">{m.l}</p></div></CardContent></Card>
         ))}
       </div>
 
-      {/* Search + List */}
-      <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" /><Input placeholder="搜索竞品名称、行业或描述..." className="pl-9 h-9 text-[13px]" value={search} onChange={e => setSearch(e.target.value)} /></div>
+      <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" /><Input placeholder="搜索竞品名称..." className="pl-9 h-9 text-[13px]" value={s} onChange={e => setS(e.target.value)} /></div>
 
       <Card className="shadow-card"><CardContent className="p-0">
         {loading ? <div className="flex justify-center py-20"><Loader2 className="size-5 animate-spin text-zinc-400" /></div>
-        : filtered.length === 0 ? <div className="text-center py-16"><Search className="size-8 text-zinc-300 mx-auto mb-3" /><p className="text-[13px] text-[var(--color-muted-foreground)]">{data.length === 0 ? "点击「新建调研」开始分析竞品" : "无匹配结果"}</p></div>
+        : filtered.length === 0 ? <div className="text-center py-16"><Search className="size-8 text-zinc-300 mx-auto mb-3" /><p className="text-[13px] text-zinc-500">{data.length === 0 ? "点击「新建调研」分析竞品视频" : "无匹配结果"}</p></div>
         : <table className="w-full">
           <thead><tr className="border-b bg-zinc-50/50">
-            <th className="text-left p-3 text-xs font-medium text-zinc-500">竞品</th><th className="text-left p-3 text-xs font-medium text-zinc-500">行业</th><th className="text-left p-3 text-xs font-medium text-zinc-500">价格区间</th><th className="text-left p-3 text-xs font-medium text-zinc-500">目标用户</th><th className="text-left p-3 text-xs font-medium text-zinc-500">竞争类型</th><th className="text-right p-3 text-xs font-medium text-zinc-500">时间</th><th className="text-center p-3 text-xs font-medium text-zinc-500 w-20">操作</th>
+            <th className="text-left p-3 text-xs font-medium text-zinc-500">竞品</th><th className="text-left p-3 text-xs font-medium text-zinc-500">行业</th><th className="text-left p-3 text-xs font-medium text-zinc-500">视频类型</th><th className="text-left p-3 text-xs font-medium text-zinc-500">钩子类型</th><th className="text-center p-3 text-xs font-medium text-zinc-500">分镜</th><th className="text-right p-3 text-xs font-medium text-zinc-500">时间</th><th className="text-center p-3 text-xs font-medium text-zinc-500 w-20">操作</th>
           </tr></thead>
           <tbody>
             {filtered.map(item => (
               <tr key={item.id} className="border-b hover:bg-zinc-50/50 transition-colors">
-                <td className="p-3"><div className="flex items-center gap-2">
-                  <span className="text-[13px] font-medium">{item.competitorName}</span>
-                  <a href={item.competitorLink} target="_blank" rel="noopener"><ExternalLink className="size-3 text-zinc-400 hover:text-[var(--color-primary)]" /></a>
-                </div></td>
+                <td className="p-3"><div className="flex items-center gap-2"><span className="text-[13px] font-medium">{item.competitorName}</span><a href={item.competitorLink} target="_blank" rel="noopener"><ExternalLink className="size-3 text-zinc-400 hover:text-[var(--color-primary)]" /></a></div></td>
                 <td className="p-3 text-[13px]">{item.industry}</td>
-                <td className="p-3 text-[13px]">{item.productPositioning?.priceRange || "-"}</td>
-                <td className="p-3"><div className="flex flex-wrap gap-1">{(item.productPositioning?.targetUsers || []).slice(0, 2).map(u => <Badge key={u} variant="outline" className="text-[11px]">{u}</Badge>)}</div></td>
-                <td className="p-3"><Badge variant="outline" className="text-[11px]">{item.marketAnalysis?.competitorType || "-"}</Badge></td>
+                <td className="p-3"><Badge variant="outline" className="text-[11px]">{item.basicInfo?.videoType || "-"}</Badge></td>
+                <td className="p-3 text-[13px]">{item.basicInfo?.hookType || "-"}</td>
+                <td className="p-3 text-center text-[13px] font-medium tabular-nums">{item.shots?.length || 0}</td>
                 <td className="p-3 text-[13px] text-zinc-500 text-right whitespace-nowrap">{formatDate(item.createdAt)}</td>
-                <td className="p-3"><div className="flex items-center justify-center gap-1">
-                  <Button variant="ghost" size="sm" onClick={() => { setSelected(item); setShowDetail(true); }}><Eye className="size-4" /></Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(item.id)}><Trash2 className="size-4 text-[var(--color-destructive)]" /></Button>
-                </div></td>
+                <td className="p-3"><div className="flex items-center justify-center gap-1"><Button variant="ghost" size="sm" onClick={() => { setSel(item); setShowDetail(true); }}><Eye className="size-4" /></Button><Button variant="ghost" size="sm" onClick={() => handleDelete(item.id)}><Trash2 className="size-4 text-[var(--color-destructive)]" /></Button></div></td>
               </tr>
             ))}
           </tbody>
@@ -117,51 +99,70 @@ export default function CompetitiveResearchPage() {
 
       {/* Detail Dialog */}
       <Dialog open={showDetail} onOpenChange={setShowDetail}>
-        <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
-          <DialogHeader><DialogTitle className="text-lg flex items-center gap-2">
-            <BarChart3 className="size-5" />竞品分析报告 · {selected?.competitorName}
-          </DialogTitle></DialogHeader>
-          {selected && (
+        <DialogContent className="max-w-6xl max-h-[88vh] overflow-y-auto">
+          <DialogHeader><DialogTitle className="text-lg flex items-center gap-2"><Film className="size-5" />竞品视频分析报告 · {sel?.competitorName}</DialogTitle></DialogHeader>
+          {sel && (
             <div className="space-y-5">
-              {/* Product description */}
-              <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-4">
-                <p className="text-[13px] leading-relaxed">{selected.productDescription}</p>
-                <div className="flex flex-wrap gap-4 mt-3 text-xs text-zinc-500">
-                  <span className="flex items-center gap-1"><DollarSign className="size-3" />{selected.productPositioning?.priceRange}</span>
-                  <span className="flex items-center gap-1"><Users className="size-3" />{(selected.productPositioning?.targetUsers || []).join("、")}</span>
-                  <span className="flex items-center gap-1"><Globe className="size-3" />{(selected.marketAnalysis?.primaryRegions || []).join("、")}</span>
-                </div>
+              {/* Basic Info */}
+              <div className="grid grid-cols-6 gap-3">
+                {[
+                  { l: "时长", v: sel.basicInfo?.duration, icon: Clock },
+                  { l: "品类", v: sel.basicInfo?.category, icon: Target },
+                  { l: "类型", v: sel.basicInfo?.videoType, icon: Film },
+                  { l: "钩子", v: sel.basicInfo?.hookType, icon: Zap },
+                  { l: "CTA", v: sel.basicInfo?.ctaType, icon: TrendingUp },
+                  { l: "行业", v: sel.industry, icon: Target },
+                ].map(m => (
+                  <Card key={m.l} className="shadow-card"><CardContent className="p-3 text-center">
+                    <m.icon className="size-4 mx-auto mb-1 text-zinc-400" />
+                    <p className="text-sm font-semibold">{m.v || "-"}</p>
+                    <p className="text-[11px] text-zinc-500">{m.l}</p>
+                  </CardContent></Card>
+                ))}
               </div>
 
-              <Tabs defaultValue="features">
-                <TabsList className="w-full">
-                  <TabsTrigger value="features" className="text-xs">功能对比</TabsTrigger>
-                  <TabsTrigger value="market" className="text-xs">市场分析</TabsTrigger>
-                  <TabsTrigger value="swot" className="text-xs">SWOT</TabsTrigger>
-                  <TabsTrigger value="content" className="text-xs">内容策略</TabsTrigger>
-                  <TabsTrigger value="actions" className="text-xs">行动建议</TabsTrigger>
+              {/* Hook details */}
+              {sel.basicInfo?.hookKeyElements && (
+                <Card className="shadow-card border-l-[3px] border-l-[var(--color-destructive)]"><CardContent className="p-4">
+                  <p className="text-xs font-medium text-zinc-500 mb-1">开场0.3秒画面关键元素</p>
+                  <p className="text-[13px]">{sel.basicInfo.hookKeyElements}</p>
+                </CardContent></Card>
+              )}
+
+              <Tabs defaultValue="shots">
+                <TabsList className="w-full flex-wrap">
+                  <TabsTrigger value="shots" className="text-xs"><Camera className="size-3 mr-1" />分镜拆解 ({sel.shots?.length || 0})</TabsTrigger>
+                  <TabsTrigger value="psychology" className="text-xs"><Brain className="size-3 mr-1" />消费心理学</TabsTrigger>
+                  <TabsTrigger value="rhythm" className="text-xs"><Activity className="size-3 mr-1" />节奏曲线</TabsTrigger>
+                  <TabsTrigger value="insights" className="text-xs"><Lightbulb className="size-3 mr-1" />总结复刻</TabsTrigger>
                 </TabsList>
 
-                {/* Features comparison */}
-                <TabsContent value="features" className="mt-4">
-                  <Card className="shadow-card"><CardContent className="p-0">
-                    <table className="w-full">
+                {/* Shots Table */}
+                <TabsContent value="shots" className="mt-4">
+                  <Card className="shadow-card"><CardContent className="p-0 overflow-x-auto">
+                    <table className="w-full text-[12px]">
                       <thead><tr className="border-b bg-zinc-50">
-                        <th className="text-left p-3 text-xs font-medium text-zinc-500 w-1/4">功能点</th>
-                        <th className="text-left p-3 text-xs font-medium text-zinc-500 w-[30%]">{selected.competitorName}</th>
-                        <th className="text-left p-3 text-xs font-medium text-zinc-500 w-[30%]">飞书AI视频平台</th>
-                        <th className="text-center p-3 text-xs font-medium text-zinc-500 w-16">优势</th>
+                        <th className="p-2 text-center w-10">#</th><th className="p-2 text-left">时间</th><th className="p-2 text-left">时长</th><th className="p-2 text-center">景别</th><th className="p-2 text-left">运镜</th><th className="p-2 text-left">画面内容</th><th className="p-2 text-left">光线</th><th className="p-2 text-left">人物动作</th><th className="p-2 text-left">产品位置</th><th className="p-2 text-left">字幕</th><th className="p-2 text-left">节奏</th><th className="p-2 text-left w-32">消费心理学</th><th className="p-2 text-left w-40">黄金15帧</th><th className="p-2 text-center">复刻</th>
                       </tr></thead>
                       <tbody>
-                        {(selected.features || []).map((f, i) => (
-                          <tr key={i} className="border-b last:border-b-0">
-                            <td className="p-3 text-[13px] font-medium">{f.feature}</td>
-                            <td className="p-3 text-[13px] text-zinc-600">{f.competitor}</td>
-                            <td className="p-3 text-[13px] text-zinc-600">{f.ours}</td>
-                            <td className="p-3 text-center">
-                              {f.advantage === "ours" ? <Check className="size-4 text-emerald-500 mx-auto" />
-                              : f.advantage === "competitor" ? <Minus className="size-4 text-orange-500 mx-auto" />
-                              : <span className="text-xs text-zinc-400">持平</span>}
+                        {sel.shots?.map((shot, i) => (
+                          <tr key={i} className="border-b hover:bg-zinc-50/50 align-top">
+                            <td className="p-2 text-center font-mono font-bold">{shot.shotNumber}</td>
+                            <td className="p-2 font-mono whitespace-nowrap">{shot.timeCode}</td>
+                            <td className="p-2 whitespace-nowrap">{shot.duration}</td>
+                            <td className="p-2 text-center"><Badge variant="outline" className="text-[10px]">{shot.shotSize}</Badge></td>
+                            <td className="p-2 text-zinc-600">{shot.cameraMovement}</td>
+                            <td className="p-2 max-w-[200px]">{shot.visualContent}</td>
+                            <td className="p-2 text-zinc-600 text-[11px]">{shot.lighting}</td>
+                            <td className="p-2 text-zinc-600 text-[11px] max-w-[150px]">{shot.characterAction}</td>
+                            <td className="p-2 text-zinc-600 text-[11px]">{shot.productPosition}</td>
+                            <td className="p-2 text-zinc-600 text-[11px] max-w-[200px]">{shot.subtitle}</td>
+                            <td className="p-2 text-zinc-600 text-[11px]">{shot.rhythm}</td>
+                            <td className="p-2 text-[11px]">{shot.consumerPsychology}</td>
+                            <td className="p-2 text-[11px]">{shot.golden15Frames}</td>
+                            <td className="p-2 text-center">
+                              <span className="text-yellow-500">{"★".repeat(Math.min(shot.replicabilityScore || 3, 5))}</span>
+                              <p className="text-[10px] text-zinc-500 mt-0.5">{shot.replicationKey}</p>
                             </td>
                           </tr>
                         ))}
@@ -170,81 +171,98 @@ export default function CompetitiveResearchPage() {
                   </CardContent></Card>
                 </TabsContent>
 
-                {/* Market + SWOT */}
-                <TabsContent value="market" className="mt-4 space-y-4">
-                  <div className="grid grid-cols-3 gap-4">
-                    {[
-                      { l: "公司阶段", v: selected.marketAnalysis?.companySize, icon: TrendingUp },
-                      { l: "增长趋势", v: selected.marketAnalysis?.growthTrend, icon: BarChart3 },
-                      { l: "竞争类型", v: selected.marketAnalysis?.competitorType, icon: Target },
-                    ].map(m => (
-                      <Card key={m.l} className="shadow-card"><CardContent className="p-4 text-center">
-                        <m.icon className="size-5 mx-auto mb-2 text-zinc-400" />
-                        <p className="text-[13px] font-medium">{m.v || "-"}</p>
-                        <p className="text-[11px] text-zinc-500 mt-0.5">{m.l}</p>
-                      </CardContent></Card>
-                    ))}
-                  </div>
+                {/* Psychology */}
+                <TabsContent value="psychology" className="mt-4 space-y-4">
                   <Card className="shadow-card"><CardContent className="p-4">
-                    <p className="text-xs font-medium text-zinc-500 mb-1">核心卖点</p>
-                    <p className="text-[13px]">{selected.productPositioning?.coreValueProp}</p>
+                    <p className="text-sm font-semibold mb-3 flex items-center gap-2"><Brain className="size-4 text-indigo-500" />消费心理学武器</p>
+                    <div className="space-y-2">{sel.psychologyWeapons?.map((wp, i) => (
+                      <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-zinc-50">
+                        <div className="size-8 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0 font-bold text-sm text-indigo-600">{wp.intensity}</div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-0.5"><span className="text-[13px] font-medium">{wp.name}</span><Badge variant="outline" className="text-[10px]">{wp.timeRange}</Badge>
+                            <div className="flex gap-0.5 ml-auto">{Array.from({ length: 10 }).map((_, j) => <div key={j} className={`w-1.5 h-3 rounded-sm ${j < wp.intensity ? "bg-indigo-400" : "bg-zinc-200"}`} />)}</div>
+                          </div>
+                          <p className="text-[12px] text-zinc-500">{wp.description}</p>
+                        </div>
+                      </div>
+                    ))}</div>
                   </CardContent></Card>
-                </TabsContent>
 
-                {/* SWOT */}
-                <TabsContent value="swot" className="mt-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <Card className="shadow-card border-emerald-100 bg-emerald-50/30"><CardContent className="p-4">
-                      <p className="text-sm font-semibold flex items-center gap-1.5 mb-3"><Shield className="size-4 text-emerald-600" />竞品优势</p>
-                      <ul className="space-y-1.5">{selected.swot?.strengths?.map((s, i) => <li key={i} className="text-[13px] flex items-start gap-1.5"><span className="text-emerald-500 mt-1">•</span>{s}</li>)}</ul>
-                    </CardContent></Card>
-                    <Card className="shadow-card border-orange-100 bg-orange-50/30"><CardContent className="p-4">
-                      <p className="text-sm font-semibold flex items-center gap-1.5 mb-3"><AlertTriangle className="size-4 text-orange-500" />竞品劣势</p>
-                      <ul className="space-y-1.5">{selected.swot?.weaknesses?.map((s, i) => <li key={i} className="text-[13px] flex items-start gap-1.5"><span className="text-orange-500 mt-1">•</span>{s}</li>)}</ul>
-                    </CardContent></Card>
-                    <Card className="shadow-card border-blue-100 bg-blue-50/30"><CardContent className="p-4">
-                      <p className="text-sm font-semibold flex items-center gap-1.5 mb-3"><Zap className="size-4 text-blue-600" />我方机会</p>
-                      <ul className="space-y-1.5">{selected.swot?.opportunities?.map((s, i) => <li key={i} className="text-[13px] flex items-start gap-1.5"><span className="text-blue-500 mt-1">•</span>{s}</li>)}</ul>
-                    </CardContent></Card>
-                    <Card className="shadow-card border-red-100 bg-red-50/30"><CardContent className="p-4">
-                      <p className="text-sm font-semibold flex items-center gap-1.5 mb-3"><AlertTriangle className="size-4 text-red-500" />潜在威胁</p>
-                      <ul className="space-y-1.5">{selected.swot?.threats?.map((s, i) => <li key={i} className="text-[13px] flex items-start gap-1.5"><span className="text-red-500 mt-1">•</span>{s}</li>)}</ul>
-                    </CardContent></Card>
-                  </div>
-                </TabsContent>
-
-                {/* Content Strategy */}
-                <TabsContent value="content" className="mt-4">
-                  <Card className="shadow-card"><CardContent className="p-4 space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
+                  {/* Purchase decision path */}
+                  <Card className="shadow-card"><CardContent className="p-4">
+                    <p className="text-sm font-semibold mb-3 flex items-center gap-2"><Target className="size-4 text-emerald-500" />购买决策路径</p>
+                    <div className="flex items-center gap-1">
                       {[
-                        { l: "主要平台", v: (selected.contentStrategy?.primaryPlatforms || []).join("、") },
-                        { l: "内容类型", v: (selected.contentStrategy?.contentTypes || []).join("、") },
-                        { l: "平均时长", v: selected.contentStrategy?.avgDuration },
-                        { l: "发布频率", v: selected.contentStrategy?.postingFrequency },
-                        { l: "互动水平", v: selected.contentStrategy?.engagementLevel === "高" ? "高互动" : selected.contentStrategy?.engagementLevel === "中" ? "中等互动" : "低互动" },
-                        { l: "热门话题", v: (selected.contentStrategy?.topPerformingTopics || []).join("、") },
-                      ].map(m => (
-                        <div key={m.l} className="flex items-center gap-2">
-                          <span className="text-xs text-zinc-500 w-20 shrink-0">{m.l}</span>
-                          <span className="text-[13px] font-medium">{m.v || "-"}</span>
+                        { key: "attention" as const, label: "注意", desc: sel.purchaseDecisionPath?.attention },
+                        { key: "interest" as const, label: "兴趣", desc: sel.purchaseDecisionPath?.interest },
+                        { key: "desire" as const, label: "渴望", desc: sel.purchaseDecisionPath?.desire },
+                        { key: "trust" as const, label: "信任", desc: sel.purchaseDecisionPath?.trust },
+                        { key: "action" as const, label: "行动", desc: sel.purchaseDecisionPath?.action },
+                      ].map((p, i) => (
+                        <div key={p.key} className="flex items-center flex-1">
+                          <div className="flex-1 text-center">
+                            <div className="size-8 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-1 font-bold text-xs text-emerald-700">{p.label}</div>
+                            <p className="text-[11px] text-zinc-500 leading-tight">{p.desc?.split("：")[0] || p.label}</p>
+                          </div>
+                          {i < 4 && <ChevronRight className="size-4 text-zinc-300 shrink-0" />}
                         </div>
                       ))}
                     </div>
                   </CardContent></Card>
                 </TabsContent>
 
-                {/* Actionable Insights */}
-                <TabsContent value="actions" className="mt-4 space-y-4">
-                  <Card className="shadow-card border-indigo-100 bg-indigo-50/30"><CardContent className="p-4">
-                    <p className="text-sm font-semibold flex items-center gap-1.5 mb-2"><Lightbulb className="size-4 text-indigo-600" />核心发现</p>
-                    <p className="text-[13px] leading-relaxed whitespace-pre-wrap">{selected.keyInsights}</p>
+                {/* Rhythm */}
+                <TabsContent value="rhythm" className="mt-4 space-y-4">
+                  <Card className="shadow-card"><CardContent className="p-4 overflow-x-auto">
+                    <p className="text-sm font-semibold mb-3 flex items-center gap-2"><Activity className="size-4 text-orange-500" />节奏强度表</p>
+                    <table className="w-full text-[13px]">
+                      <thead><tr className="border-b"><th className="text-left p-2">时间段</th><th className="text-center p-2">视觉强度</th><th className="text-center p-2">情绪强度</th><th className="text-center p-2">信息密度</th><th className="text-left p-2">产品出现</th><th className="text-left p-2">节奏定位</th></tr></thead>
+                      <tbody>{sel.rhythmIntensity?.map((r, i) => (
+                        <tr key={i} className="border-b last:border-0">
+                          <td className="p-2 font-mono">{r.timeRange}</td>
+                          <td className="p-2 text-center"><span className="inline-flex gap-0.5">{[1,2,3,4,5].map(n => <div key={n} className={`w-3 h-3 rounded-sm ${n <= r.visualIntensity ? "bg-[var(--color-destructive)]" : "bg-zinc-100"}`} />)}</span></td>
+                          <td className="p-2 text-center"><span className="inline-flex gap-0.5">{[1,2,3,4,5].map(n => <div key={n} className={`w-3 h-3 rounded-sm ${n <= r.emotionIntensity ? "bg-[var(--color-primary)]" : "bg-zinc-100"}`} />)}</span></td>
+                          <td className="p-2 text-center"><span className="inline-flex gap-0.5">{[1,2,3,4,5].map(n => <div key={n} className={`w-3 h-3 rounded-sm ${n <= r.infoDensity ? "bg-[var(--color-warning)]" : "bg-zinc-100"}`} />)}</span></td>
+                          <td className="p-2 text-zinc-600">{r.productAppearance}</td>
+                          <td className="p-2">{r.rhythmPosition}</td>
+                        </tr>
+                      ))}</tbody>
+                    </table>
                   </CardContent></Card>
+
+                  {/* Rhythm Curve Analysis */}
+                  {sel.rhythmCurveAnalysis && (
+                    <Card className="shadow-card"><CardContent className="p-4">
+                      <p className="text-sm font-semibold mb-3 flex items-center gap-2"><Activity className="size-4 text-orange-500" />节奏曲线分析</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        {[
+                          { l: "曲线形态", v: sel.rhythmCurveAnalysis.curveShape },
+                          { l: "波峰数量", v: `${sel.rhythmCurveAnalysis.peakCount}个` },
+                          { l: "剪辑节奏", v: sel.rhythmCurveAnalysis.editingStats },
+                          { l: "波峰引爆", v: (sel.rhythmCurveAnalysis.peakTriggers || []).join("；") },
+                        ].map(m => (
+                          <div key={m.l} className="flex items-start gap-2"><span className="text-xs text-zinc-500 w-20 shrink-0 mt-0.5">{m.l}</span><span className="text-[13px] font-medium">{m.v || "-"}</span></div>
+                        ))}
+                      </div>
+                      {(sel.rhythmCurveAnalysis.valleyPoints || []).length > 0 && (
+                        <div className="flex items-start gap-2 mt-2"><span className="text-xs text-zinc-500 w-20 shrink-0 mt-0.5">波谷位置</span><span className="text-[13px]">{sel.rhythmCurveAnalysis.valleyPoints.join("；")}</span></div>
+                      )}
+                    </CardContent></Card>
+                  )}
+                </TabsContent>
+
+                {/* Summary & Replication */}
+                <TabsContent value="insights" className="mt-4 space-y-4">
+                  <Card className="shadow-card border-indigo-100 bg-indigo-50/30"><CardContent className="p-4">
+                    <p className="text-sm font-semibold flex items-center gap-2 mb-2"><Lightbulb className="size-4 text-indigo-600" />总结</p>
+                    <p className="text-[13px] leading-relaxed">{sel.summary}</p>
+                  </CardContent></Card>
+
                   <Card className="shadow-card"><CardContent className="p-4">
-                    <p className="text-sm font-semibold flex items-center gap-1.5 mb-3"><Zap className="size-4 text-[var(--color-primary)]" />可执行建议</p>
-                    <ol className="space-y-2">{selected.actionableRecommendations?.map((r, i) => (
+                    <p className="text-sm font-semibold flex items-center gap-2 mb-3"><Star className="size-4 text-yellow-500" />可复制元素</p>
+                    <ol className="space-y-2">{(sel.replicableElements || []).map((r, i) => (
                       <li key={i} className="flex items-start gap-2 text-[13px]">
-                        <span className="size-5 rounded-full bg-[var(--color-primary)] text-white text-[11px] flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
+                        <span className="size-5 rounded-full bg-yellow-400 text-white text-[11px] flex items-center justify-center shrink-0 mt-0.5 font-bold">{i + 1}</span>
                         {r}
                       </li>
                     ))}</ol>
@@ -256,19 +274,11 @@ export default function CompetitiveResearchPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Add Dialog */}
+      {/* Add */}
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
-        <DialogContent>
-          <DialogHeader><DialogTitle><Sparkles className="size-5 inline mr-2" />新建竞品调研</DialogTitle></DialogHeader>
-          <div className="space-y-3">
-            <div><label className="text-[13px] font-medium">竞品链接</label><Input placeholder="https://www.synthesia.io" value={newUrl} onChange={e => setNewUrl(e.target.value)} /></div>
-            <p className="text-xs text-zinc-500">AI将抓取网页内容并从产品定位、功能、市场、SWOT维度生成分析报告</p>
-            {error && <p className="text-sm text-red-600 bg-red-50 rounded-lg p-2">{error}</p>}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAdd(false)}>取消</Button>
-            <Button onClick={handleAdd} disabled={adding || !newUrl}>{adding ? <><Loader2 className="size-4 animate-spin mr-2" />分析中...</> : <><Sparkles className="size-4 mr-2" />开始深度分析</>}</Button>
-          </DialogFooter>
+        <DialogContent><DialogHeader><DialogTitle><Sparkles className="size-5 inline mr-2" />新建竞品视频调研</DialogTitle></DialogHeader>
+          <div className="space-y-3"><div><label className="text-[13px] font-medium">竞品链接</label><Input placeholder="输入竞品产品/视频链接" value={url} onChange={e => setUrl(e.target.value)} /></div><p className="text-xs text-zinc-500">AI将以TikTok商业广告导演视角，进行分镜拆解+消费心理学+节奏分析</p>{err && <p className="text-sm text-red-600 bg-red-50 rounded-lg p-2">{err}</p>}</div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowAdd(false)}>取消</Button><Button onClick={handleAdd} disabled={adding || !url}>{adding ? <><Loader2 className="size-4 animate-spin mr-2" />分析中...</> : <><Sparkles className="size-4 mr-2" />开始导演级分析</>}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
