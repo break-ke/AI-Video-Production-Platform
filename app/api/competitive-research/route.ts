@@ -9,10 +9,10 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { url } = body;
+    const { url, videoUrl } = body;
     if (!url) return NextResponse.json({ success: false, error: "缺少竞品链接" }, { status: 400 });
 
-    const analysis = await analyzeVideo(url);
+    const analysis = await analyzeVideo(url, videoUrl || undefined);
 
     const id = `CR-${Date.now().toString(36).toUpperCase()}`;
     const item = {

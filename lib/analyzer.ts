@@ -1,5 +1,5 @@
 import type { CompetitiveResearch } from "@/types";
-import { chatCompletion } from "@/lib/lingke";
+import { geminiChat } from "@/lib/lingke";
 
 const ANALYSIS_PROMPT_TEMPLATE = `你是一位TikTok商业广告导演，拥有10年短视频带货经验。
 你将用一套多维拆解框架对这段竞品视频进行超精细分析。
@@ -133,7 +133,7 @@ function parseJSONFromAI(text: string): Record<string, unknown> | null {
   return null;
 }
 
-export async function analyzeVideo(url: string): Promise<CompetitiveResearch> {
+export async function analyzeVideo(url: string, videoFileUrl?: string): Promise<CompetitiveResearch> {
   const page = await scrapePage(url);
   const competitorName = domainName(url);
 
@@ -148,39 +148,29 @@ export async function analyzeVideo(url: string): Promise<CompetitiveResearch> {
     if (domain.includes(k) || url.includes(k)) { industry = v; break; }
   }
 
-  // Build the full analysis prompt
-  const fullPrompt = `${ANALYSIS_PROMPT_TEMPLATE}
-
----
-
-分析目标：
+  // Build user prompt
+  const userPrompt = `分析目标：
 链接: ${url}
 竞品名称: ${competitorName}
 页面标题: ${page.title}
 页面描述: ${page.description}
-页面内容摘要: ${page.bodyText}
+${videoFileUrl ? `\n**视频文件已提供**：请直接分析上传的视频内容，逐帧拆解画面。` : `\n页面内容摘要: ${page.bodyText}\n请基于网页信息分析该竞品的典型视频广告策略。`}
 
-请基于以上网页信息，以TikTok商业广告导演视角，分析这个竞品产品的典型视频广告策略。
-输出为一个完整的JSON对象（不要Markdown代码块），包含以下结构：
+${ANALYSIS_PROMPT_TEMPLATE}
 
-{
-  "basicInfo": { "duration": "", "category": "", "videoType": "", "hookType": "", "hookKeyElements": "", "ctaType": "" },
-  "shots": [{ "shotNumber": 1, "timeCode": "", "duration": "", "shotSize": "", "cameraMovement": "", "visualContent": "", "lighting": "", "characterAction": "", "productPosition": "", "subtitle": "", "rhythm": "", "consumerPsychology": "", "golden15Frames": "", "replicabilityScore": 3, "replicationKey": "" }],
-  "psychologyWeapons": [{ "name": "", "timeRange": "", "intensity": 5, "description": "" }],
-  "purchaseDecisionPath": { "attention": "", "interest": "", "desire": "", "trust": "", "action": "" },
-  "rhythmIntensity": [{ "timeRange": "", "visualIntensity": 3, "emotionIntensity": 3, "infoDensity": 3, "productAppearance": "", "rhythmPosition": "" }],
-  "rhythmCurveAnalysis": { "curveShape": "", "peakCount": 0, "peakTriggers": [], "valleyPoints": [], "editingStats": "" },
-  "summary": "",
-  "replicableElements": []
-}`;
+输出一个完整的JSON对象（不要Markdown代码块），结构如下：
+{"basicInfo":{"duration":"","category":"","videoType":"","hookType":"","hookKeyElements":"","ctaType":""},"shots":[{"shotNumber":1,"timeCode":"","duration":"","shotSize":"","cameraMovement":"","visualContent":"","lighting":"","characterAction":"","productPosition":"","subtitle":"","rhythm":"","consumerPsychology":"","golden15Frames":"","replicabilityScore":3,"replicationKey":""}],"psychologyWeapons":[{"name":"","timeRange":"","intensity":5,"description":""}],"purchaseDecisionPath":{"attention":"","interest":"","desire":"","trust":"","action":""},"rhythmIntensity":[{"timeRange":"","visualIntensity":3,"emotionIntensity":3,"infoDensity":3,"productAppearance":"","rhythmPosition":""}],"rhythmCurveAnalysis":{"curveShape":"","peakCount":0,"peakTriggers":[],"valleyPoints":[],"editingStats":""},"summary":"","replicableElements":[]}`;
 
-  // Call AI for analysis
+  // Call Gemini for multimodal analysis
   let aiResult = "";
   try {
-    aiResult = await chatCompletion("gpt-4o", [
-      { role: "system", content: "你是TikTok商业广告导演。按照用户要求的JSON格式输出分析结果。只输出JSON，不要额外说明。" },
-      { role: "user", content: fullPrompt },
-    ], { maxTokens: 4096, temperature: 0.3 });
+    aiResult = await geminiChat(
+      "gemini-3.1-pro-preview",
+      "你是TikTok商业广告导演。按照用户要求的JSON格式输出分析结果。如果提供了视频文件，直接分析视频画面。只输出JSON，不要额外说明。",
+      userPrompt,
+      videoFileUrl, // pass video URL for multimodal analysis
+      { maxTokens: 8192, temperature: 0.3 }
+    );
   } catch { /* fall back */ }
 
   // Parse AI result

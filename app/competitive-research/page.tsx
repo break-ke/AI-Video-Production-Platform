@@ -23,6 +23,9 @@ export default function CompetitiveResearchPage() {
   const [showAdd, setShowAdd] = useState(false);
   const [url, setUrl] = useState("");
   const [adding, setAdding] = useState(false);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoUrl, setVideoUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
   const [err, setErr] = useState("");
 
   const refresh = useCallback(async () => {
@@ -41,13 +44,29 @@ export default function CompetitiveResearchPage() {
     setData(d => d.filter(x => x.id !== id));
   };
 
+  const handleUpload = async () => {
+    if (!videoFile) return;
+    setUploading(true); setErr("");
+    try {
+      const form = new FormData();
+      form.append("video", videoFile);
+      const r = await fetch("/api/upload", { method: "POST", body: form });
+      const j = await r.json();
+      if (j.success) { setVideoUrl(j.data.videoUrl); setVideoFile(null); }
+      else setErr(j.error);
+    } catch { setErr("上传失败"); }
+    finally { setUploading(false); }
+  };
+
   const handleAdd = async () => {
     if (!url) return;
     setAdding(true); setErr("");
     try {
-      const r = await fetch("/api/competitive-research", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) });
+      const body: Record<string, string> = { url };
+      if (videoUrl) body.videoUrl = videoUrl;
+      const r = await fetch("/api/competitive-research", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       const j = await r.json();
-      if (j.success) { setData(d => [j.data, ...d]); setShowAdd(false); setUrl(""); }
+      if (j.success) { setData(d => [j.data, ...d]); setShowAdd(false); setUrl(""); setVideoUrl(""); setVideoFile(null); }
       else setErr(j.error);
     } catch { setErr("网络错误"); }
     finally { setAdding(false); }
@@ -277,8 +296,45 @@ export default function CompetitiveResearchPage() {
       {/* Add */}
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
         <DialogContent><DialogHeader><DialogTitle><Sparkles className="size-5 inline mr-2" />新建竞品视频调研</DialogTitle></DialogHeader>
-          <div className="space-y-3"><div><label className="text-[13px] font-medium">竞品链接</label><Input placeholder="输入竞品产品/视频链接" value={url} onChange={e => setUrl(e.target.value)} /></div><p className="text-xs text-zinc-500">AI将以TikTok商业广告导演视角，进行分镜拆解+消费心理学+节奏分析</p>{err && <p className="text-sm text-red-600 bg-red-50 rounded-lg p-2">{err}</p>}</div>
-          <DialogFooter><Button variant="outline" onClick={() => setShowAdd(false)}>取消</Button><Button onClick={handleAdd} disabled={adding || !url}>{adding ? <><Loader2 className="size-4 animate-spin mr-2" />分析中...</> : <><Sparkles className="size-4 mr-2" />开始导演级分析</>}</Button></DialogFooter>
+          <div className="space-y-3">
+            <div><label className="text-[13px] font-medium">竞品链接</label><Input placeholder="输入竞品产品/视频链接" value={url} onChange={e => setUrl(e.target.value)} /></div>
+
+            {/* Video upload section */}
+            <div className="border-t pt-3">
+              <label className="text-[13px] font-medium mb-2 block">上传视频（可选）</label>
+              {videoUrl ? (
+                <div className="flex items-center gap-2 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                  <Film className="size-4 text-emerald-600" />
+                  <span className="text-[13px] text-emerald-700">视频已上传</span>
+                  <button onClick={() => { setVideoUrl(""); setVideoFile(null); }} className="ml-auto text-xs text-red-500 hover:underline">移除</button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <label className="flex-1 cursor-pointer">
+                      <div className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-zinc-300 rounded-lg hover:border-[var(--color-primary)] hover:bg-blue-50/30 transition-colors">
+                        <Film className="size-5 text-zinc-400" />
+                        <span className="text-[13px] text-zinc-500">{videoFile ? videoFile.name : "点击选择视频文件 (MP4/MOV/WebM, ≤100MB)"}</span>
+                      </div>
+                      <input type="file" accept="video/mp4,video/quicktime,video/webm" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) setVideoFile(f); }} />
+                    </label>
+                  </div>
+                  {videoFile && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-zinc-500">{(videoFile.size / 1024 / 1024).toFixed(1)}MB</span>
+                      <Button size="sm" variant="outline" onClick={handleUpload} disabled={uploading} className="h-7 text-xs">
+                        {uploading ? <><Loader2 className="size-3 animate-spin mr-1" />上传中</> : "上传视频"}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <p className="text-xs text-zinc-500">Gemini 3.1 Pro 多模态分析：网页抓取 + 视频逐帧拆解 + 消费心理学 + 节奏分析</p>
+            {err && <p className="text-sm text-red-600 bg-red-50 rounded-lg p-2">{err}</p>}
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowAdd(false)}>取消</Button><Button onClick={handleAdd} disabled={adding || !url}>{adding ? <><Loader2 className="size-4 animate-spin mr-2" />分析中...</> : <><Sparkles className="size-4 mr-2" />{videoUrl ? "视频+网页深度分析" : "网页分析"}</>}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

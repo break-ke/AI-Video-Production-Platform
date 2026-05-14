@@ -104,6 +104,47 @@ export async function chatCompletion(
   return data.choices?.[0]?.message?.content || "";
 }
 
+// Gemini-specific multimodal chat with video support
+export async function geminiChat(
+  model: string,
+  systemPrompt: string,
+  userPrompt: string,
+  videoUrl?: string,
+  options: { maxTokens?: number; temperature?: number } = {}
+): Promise<string> {
+  const contents: Record<string, unknown>[] = [
+    { role: "user", parts: [{ text: userPrompt }] },
+  ];
+
+  // If video URL provided, add as multimodal input
+  if (videoUrl) {
+    contents[0] = {
+      role: "user",
+      parts: [
+        { text: userPrompt },
+        { file_data: { mime_type: "video/mp4", file_uri: videoUrl } },
+      ],
+    };
+  }
+
+  const data = await lingkeFetch(
+    `/v1beta/models/${model}:generateContent`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        contents,
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+        generationConfig: {
+          maxOutputTokens: options.maxTokens || 4096,
+          temperature: options.temperature ?? 0.3,
+        },
+      }),
+    }
+  );
+
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+}
+
 // -------- Balance check --------
 
 export async function checkBalance() {

@@ -96,6 +96,12 @@
       "namedRegex": "^/api/storyboard(?:/)?$"
     },
     {
+      "page": "/api/upload",
+      "regex": "^/api/upload(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/upload(?:/)?$"
+    },
+    {
       "page": "/auto-editing",
       "regex": "^/auto\\-editing(?:/)?$",
       "routeKeys": {},

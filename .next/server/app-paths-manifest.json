@@ -10,6 +10,7 @@
   "/api/one-click-replicate/route": "app/api/one-click-replicate/route.js",
   "/api/script-iteration/route": "app/api/script-iteration/route.js",
   "/api/storyboard/route": "app/api/storyboard/route.js",
+  "/api/upload/route": "app/api/upload/route.js",
   "/auto-editing/page": "app/auto-editing/page.js",
   "/competitive-research/page": "app/competitive-research/page.js",
   "/feedback/page": "app/feedback/page.js",

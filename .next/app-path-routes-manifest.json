@@ -10,6 +10,7 @@
   "/api/one-click-replicate/route": "/api/one-click-replicate",
   "/api/script-iteration/route": "/api/script-iteration",
   "/api/storyboard/route": "/api/storyboard",
+  "/api/upload/route": "/api/upload",
   "/auto-editing/page": "/auto-editing",
   "/competitive-research/page": "/competitive-research",
   "/feedback/page": "/feedback",
