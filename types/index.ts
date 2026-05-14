@@ -79,6 +79,7 @@ export interface CompetitiveResearch {
   replicableElements: string[];
   // Video clips (shotNumber → clipUrl)
   clipMap?: Record<number, string>;
+  videoSourceUrl?: string | null;  // Full video source URL
   // Metadata
   creator: string;
   createdAt: string;

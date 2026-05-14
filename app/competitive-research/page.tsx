@@ -235,32 +235,28 @@ export default function CompetitiveResearchPage() {
 
               {/* Video / Source preview */}
               <div className="grid grid-cols-1 gap-3">
-                {(videoUrl || sel.competitorLink) && (
+                {sel.videoSourceUrl ? (
                   <Card className="shadow-card overflow-hidden">
                     <CardContent className="p-0">
-                      {videoUrl ? (
-                        <video src={videoUrl} controls className="w-full aspect-video" preload="metadata" />
-                      ) : (
-                        <div className="relative aspect-video bg-gradient-to-br from-zinc-900 to-zinc-800 flex items-center justify-center">
-                          <div className="text-center">
-                            <Globe className="size-10 text-zinc-500 mx-auto mb-3" />
-                            <p className="text-zinc-400 text-sm mb-2">{sel.competitorName}</p>
-                            <a href={sel.competitorLink} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 bg-[var(--color-primary)] text-white px-4 py-2 rounded-md text-sm hover:bg-[var(--color-primary)]/90 transition-colors">
-                              <ExternalLink className="size-4" /> 在新窗口打开竞品页面
-                            </a>
-                          </div>
-                        </div>
-                      )}
+                      <video src={sel.videoSourceUrl} controls className="w-full aspect-video" preload="metadata" />
                     </CardContent>
                   </Card>
-                )}
-                {!videoUrl && (
-                  <div className="flex items-center gap-2 text-xs text-zinc-500">
-                    <Globe className="size-3" />
-                    <span>{sel.competitorLink}</span>
-                    {sel.basicInfo?.duration && <span className="ml-auto">视频时长：{sel.basicInfo.duration}</span>}
+                ) : (
+                  <div className="relative aspect-video bg-gradient-to-br from-zinc-900 to-zinc-800 rounded-xl flex items-center justify-center">
+                    <div className="text-center">
+                      <Globe className="size-10 text-zinc-500 mx-auto mb-3" />
+                      <p className="text-white text-sm mb-2 font-medium">{sel.competitorName}</p>
+                      <a href={sel.competitorLink} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 bg-[var(--color-primary)] text-white px-4 py-2 rounded-md text-sm hover:opacity-90 transition-opacity">
+                        <ExternalLink className="size-4" /> 打开竞品页面（视频未能自动下载）
+                      </a>
+                    </div>
                   </div>
                 )}
+                <div className="flex items-center gap-2 text-xs text-zinc-500">
+                  <Globe className="size-3" />
+                  <a href={sel.competitorLink} target="_blank" rel="noopener" className="text-[var(--color-primary)] hover:underline truncate">{sel.competitorLink}</a>
+                  {sel.basicInfo?.duration && <span className="ml-auto shrink-0">时长：{sel.basicInfo.duration}</span>}
+                </div>
               </div>
 
               <Tabs defaultValue="shots">
@@ -290,11 +286,11 @@ export default function CompetitiveResearchPage() {
                             <td className="p-2 w-[120px]">
                               {clipUrl ? (
                                 <video src={clipUrl} controls muted className="w-[110px] h-auto rounded" preload="auto" playsInline />
-                              ) : videoUrl ? (
+                              ) : sel.videoSourceUrl ? (
                                 <video
-                                  src={`${videoUrl}#t=${seekSeconds}`}
+                                  src={`${sel.videoSourceUrl}#t=${seekSeconds}`}
                                   controls muted className="w-[110px] h-auto rounded" preload="metadata" playsInline
-                                  onLoadedMetadata={(e) => { const v = e.currentTarget; v.currentTime = seekSeconds; }}
+                                  onLoadedMetadata={(e) => { e.currentTarget.currentTime = seekSeconds; }}
                                 />
                               ) : (
                                 <div className="w-[110px] h-[62px] bg-zinc-100 rounded flex items-center justify-center">

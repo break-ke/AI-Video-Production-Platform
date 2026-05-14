@@ -39,11 +39,35 @@ export async function POST(req: NextRequest) {
         // Step 4: Shot breakdown
         send({ step: "shots", label: ANALYSIS_STEPS[3].label, status: "completed", detail: `共 ${analysis.shots?.length || 0} 个分镜` });
 
-        // Try to extract video clips if video URL provided
+        // Try to download video and extract clips
         let clipMap: Map<number, string> = new Map();
-        if (videoUrl && analysis.shots) {
-          send({ step: "shots", label: ANALYSIS_STEPS[3].label, status: "running", detail: "正在下载视频并提取分镜片段..." });
-          clipMap = await extractAllClips(videoUrl, id, analysis.shots);
+        let downloadedVideoUrl = videoUrl || null;
+
+        if (analysis.shots && analysis.shots.length > 0) {
+          send({ step: "shots", label: ANALYSIS_STEPS[3].label, status: "running", detail: "正在从竞品链接下载视频..." });
+
+          // Try to download video from the competitor URL itself
+          if (!downloadedVideoUrl) {
+            try {
+              const { downloadVideoFromUrl } = await import("@/lib/downloader");
+              const localPath = await downloadVideoFromUrl(url, id);
+              if (localPath) {
+                downloadedVideoUrl = localPath;
+                send({ step: "shots", label: ANALYSIS_STEPS[3].label, status: "running", detail: "视频已下载，正在提取分镜片段..." });
+              }
+            } catch { /* continue without */ }
+          }
+
+          // Extract clips from downloaded/uploaded video
+          if (downloadedVideoUrl && downloadedVideoUrl.startsWith("/")) {
+            // Local file path - use directly with ffmpeg
+            const { extractAllClips } = await import("@/lib/video-clips");
+            clipMap = await extractAllClips(downloadedVideoUrl, id, analysis.shots);
+          } else if (downloadedVideoUrl) {
+            const { extractAllClips } = await import("@/lib/video-clips");
+            clipMap = await extractAllClips(downloadedVideoUrl, id, analysis.shots);
+          }
+
           send({ step: "shots", label: ANALYSIS_STEPS[3].label, status: "completed", detail: `共 ${analysis.shots.length} 分镜, ${clipMap.size} 片段已提取` });
         }
 
@@ -56,11 +80,12 @@ export async function POST(req: NextRequest) {
         // Step 7: Insights
         send({ step: "insights", label: ANALYSIS_STEPS[6].label, status: "completed", detail: `${analysis.replicableElements?.length || 0} 条复刻建议` });
 
-        // Build result with clips
+        // Build result with clips and video source
         const result = {
           ...analysis,
           id,
           clipMap: Object.fromEntries(clipMap),
+          videoSourceUrl: downloadedVideoUrl || videoUrl || null,
         };
         competitiveResearch.add({ ...analysis, id });
 

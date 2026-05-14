@@ -45,7 +45,8 @@
       "Bash(node_modules/ffmpeg-static/ffmpeg.exe -y -ss 2 -i public/clips/test_source.mp4 -t 3 -c:v libx264 -preset ultrafast -crf 28 -an public/clips/test_shot.mp4)",
       "Bash(mkdir -p public/clips)",
       "Bash(node_modules/ffmpeg-static/ffmpeg.exe -y -f lavfi -i testsrc=duration=10:size=320x240:rate=24 -f lavfi -i sine=frequency=440:duration=10 -c:v libx264 -preset ultrafast -crf 28 -c:a aac public/clips/test_gen.mp4)",
-      "Bash(node_modules/ffmpeg-static/ffmpeg.exe -y -ss 2 -i public/clips/test_gen.mp4 -t 3 -c:v libx264 -preset ultrafast -crf 28 -an public/clips/test_shot1.mp4)"
+      "Bash(node_modules/ffmpeg-static/ffmpeg.exe -y -ss 2 -i public/clips/test_gen.mp4 -t 3 -c:v libx264 -preset ultrafast -crf 28 -an public/clips/test_shot1.mp4)",
+      "Bash(pip install *)"
     ]
   }
 }
