@@ -7,7 +7,9 @@ import { extractAllClips } from "@/lib/video-clips";
 // SSE streaming analysis endpoint
 export async function POST(req: NextRequest) {
   const { url, videoUrl } = await req.json();
-  if (!url) return new Response(JSON.stringify({ error: "缺少链接" }), { status: 400, headers: { "Content-Type": "application/json" } });
+  if (!url && !videoUrl) return new Response(JSON.stringify({ error: "请提供竞品链接或上传视频" }), { status: 400, headers: { "Content-Type": "application/json" } });
+  const targetUrl = url || `https://video-upload.analysis/${Date.now()}`;
+  const isVideoOnly = !url && !!videoUrl;
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
@@ -29,7 +31,7 @@ export async function POST(req: NextRequest) {
         send({ step: "scrape", label: ANALYSIS_STEPS[0].label, status: "completed", detail: "已获取页面内容" });
         send({ step: "ai", label: ANALYSIS_STEPS[1].label, status: "running", detail: "Gemini 3.1 Pro 多模态分析中..." });
 
-        const analysis = await analyzeVideo(url, videoUrl || undefined);
+        const analysis = await analyzeVideo(targetUrl, videoUrl || undefined);
 
         send({ step: "ai", label: ANALYSIS_STEPS[1].label, status: "completed", detail: `模型: gemini-3.1-pro-preview` });
 

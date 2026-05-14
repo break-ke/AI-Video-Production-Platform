@@ -134,8 +134,9 @@ function parseJSONFromAI(text: string): Record<string, unknown> | null {
 }
 
 export async function analyzeVideo(url: string, videoFileUrl?: string): Promise<CompetitiveResearch> {
-  const page = await scrapePage(url);
-  const competitorName = domainName(url);
+  const isVideoOnly = url.includes("video-upload.analysis");
+  const page = isVideoOnly ? { title: "上传视频分析", description: "用户上传的视频文件", bodyText: "" } : await scrapePage(url);
+  const competitorName = isVideoOnly ? "上传视频" : domainName(url);
 
   // Industry guess
   const domain = new URL(url).hostname;
@@ -150,11 +151,13 @@ export async function analyzeVideo(url: string, videoFileUrl?: string): Promise<
 
   // Build user prompt
   const userPrompt = `分析目标：
-链接: ${url}
+链接: ${isVideoOnly ? "用户上传的视频文件" : url}
 竞品名称: ${competitorName}
-页面标题: ${page.title}
-页面描述: ${page.description}
-${videoFileUrl ? `\n**视频文件已提供**：请直接分析上传的视频内容，逐帧拆解画面。` : `\n页面内容摘要: ${page.bodyText}\n请基于网页信息分析该竞品的典型视频广告策略。`}
+${isVideoOnly
+    ? `\n**纯视频分析模式**：请直接分析上传的视频内容，逐帧拆解画面。无需网页信息。`
+    : `\n页面标题: ${page.title}\n页面描述: ${page.description}`
+}
+${videoFileUrl ? `\n**视频文件已提供**：请直接分析视频画面，逐帧拆解。` : page.bodyText ? `\n页面内容摘要: ${page.bodyText}\n请基于网页信息分析该竞品的典型视频广告策略。` : ""}
 
 ${ANALYSIS_PROMPT_TEMPLATE}
 

@@ -72,12 +72,13 @@ export default function CompetitiveResearchPage() {
   };
 
   const handleAdd = async () => {
-    if (!url) return;
+    if (!url && !videoUrl) return;
     setAdding(true); setErr("");
     setProgressVisible(true); setProgressStep(0);
 
     try {
-      const body: Record<string, string> = { url };
+      const body: Record<string, string> = {};
+      if (url) body.url = url;
       if (videoUrl) body.videoUrl = videoUrl;
 
       // Use SSE for real progress
@@ -406,10 +407,10 @@ export default function CompetitiveResearchPage() {
           <div className="space-y-3">
             {!progressVisible ? (
               <>
-                <div><label className="text-[13px] font-medium">竞品链接</label><Input placeholder="输入竞品产品/视频链接" value={url} onChange={e => setUrl(e.target.value)} onKeyDown={e => e.key === "Enter" && handleAdd()} disabled={adding} /></div>
+                <div><label className="text-[13px] font-medium">竞品链接 {videoUrl ? <span className="text-xs text-zinc-400">(可选)</span> : <span className="text-xs text-red-500">*</span>}</label><Input placeholder={videoUrl?"可选，输入竞品链接补充分析":"输入竞品产品/视频链接" } value={url} onChange={e => setUrl(e.target.value)} onKeyDown={e => e.key === "Enter" && handleAdd()} disabled={adding} /></div>
 
                 <div className="border-t pt-3">
-                  <label className="text-[13px] font-medium mb-2 block">上传视频（可选）</label>
+                  <label className="text-[13px] font-medium mb-2 block">上传视频 {!url ? <span className="text-xs text-red-500">*（纯视频分析）</span> : <span className="text-xs text-zinc-400">(可选)</span>}</label>
                   {videoUrl ? (
                     <div className="flex items-center gap-2 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
                       <Film className="size-4 text-emerald-600" /><span className="text-[13px] text-emerald-700">视频已上传</span>
@@ -473,7 +474,7 @@ export default function CompetitiveResearchPage() {
           </div>
 
           {!progressVisible && (
-            <DialogFooter><Button variant="outline" onClick={()=>setShowAdd(false)}>取消</Button><Button onClick={handleAdd} disabled={adding||!url}>{adding?<><Loader2 className="size-4 animate-spin mr-2"/>分析中...</>:<><Sparkles className="size-4 mr-2"/>{videoUrl?"视频+网页深度分析":"开始导演级分析"}</>}</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={()=>setShowAdd(false)}>取消</Button><Button onClick={handleAdd} disabled={adding||(!url&&!videoUrl)}>{adding?<><Loader2 className="size-4 animate-spin mr-2"/>分析中...</>:<><Sparkles className="size-4 mr-2"/>{url&&videoUrl?"网页+视频双模分析":videoUrl?"纯视频导演级分析":"网页导演级分析"}</>}</Button></DialogFooter>
           )}
         </DialogContent>
       </Dialog>
