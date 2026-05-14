@@ -1,43 +1,61 @@
 import { CompetitiveResearch } from "@/types";
 
-const emptyOptimization = {
-  strengthsToLearn: [],
-  weaknessesToImprove: [],
-  suggestedScript: "",
-  keywordSuggestions: [],
-};
-
 export const mockCompetitiveResearch: CompetitiveResearch[] = [
   {
     id: "CR-001",
-    keyword: "AI视频生成",
-    industry: "人工智能",
-    competitorLink: "https://example.com/video1",
-    competitorName: "TechVision AI",
-    sellingPointsAnalysis: "### 产品卖点分析\n1. AI智能视频生成，10秒内完成60s短视频\n2. 支持50+语言配音，全球化内容分发\n3. 自动字幕匹配，节省人工校对时间\n4. 模板库2000+套，快速内容复用\n\n### 目标人群画像\n- 年龄：25-40岁\n- 职业：内容创作者、短视频运营\n- 痛点：视频制作效率低、语言障碍\n- 需求：快速批量产出多语言视频\n\n### 内容策略特征\n- 视频风格：科技感、快节奏\n- 发布频率：日更\n- 互动方式：评论区技术问答",
-    hotKeywords: ["AI视频生成", "短视频营销", "AI配音", "视频模板"],
-    viralVideos: [],
-    structureSummary: "该竞品以技术驱动型内容为主，强调产品功能演示和效率对比。视频结构通常以功能演示+效果对比为主，缺少情感共鸣和场景化叙事。",
-    scriptOptimization: emptyOptimization,
-    conclusion: "竞品在速度和模板数量上有明显优势，但视频创意多样性不足，风格偏保守。建议我方突出创意多样性和本地化适配能力。",
-    sellingPoints: "AI视频生成、短视频营销、AI配音、视频模板",
-    likes: 12500, views: 230000, favorites: 8900, shares: 3400,
-    creator: "张明", createdAt: "2026-05-10T09:30:00Z",
-  },
-  {
-    id: "CR-002",
-    keyword: "短视频营销",
-    industry: "数字营销",
-    competitorLink: "https://example.com/video2",
-    competitorName: "MarketVid Pro",
-    sellingPointsAnalysis: "### 产品卖点分析\n1. AI智能剪辑+批量生产，ROI追踪\n2. 自动分析热点话题，抢占流量先机\n3. 一键分发多平台，统一内容管理\n4. 数据分析驱动内容优化\n\n### 目标人群画像\n- 年龄：28-45岁\n- 职业：电商运营、品牌营销人员\n- 痛点：多平台管理复杂、ROI难衡量\n- 需求：数据可视化、投放效果追踪",
-    hotKeywords: ["短视频营销", "数据分析", "多平台分发", "ROI追踪"],
-    viralVideos: [],
-    structureSummary: "以数据驱动型内容为主，强调ROI和转化效果。视频风格偏商务，适合B端决策者观看，但娱乐性和传播性不足。",
-    scriptOptimization: emptyOptimization,
-    conclusion: "竞品强于数据分析和多平台分发，但单视频质量一般。建议强化视频质量与飞书生态深度集成优势。",
-    sellingPoints: "短视频营销、数据分析、多平台分发、ROI追踪",
-    likes: 8900, views: 156000, favorites: 5600, shares: 2100,
-    creator: "李婷", createdAt: "2026-05-09T14:20:00Z",
+    competitorName: "Synthesia",
+    competitorLink: "https://www.synthesia.io",
+    industry: "AI视频工具",
+    productDescription: "Synthesia是全球领先的AI数字人视频生成平台，用户无需拍摄即可创建专业视频。面向企业培训、营销和销售团队，主打多语言AI数字人播报。",
+    productPositioning: {
+      priceRange: "中高端（$22/月起，企业定制）",
+      targetUsers: ["企业培训团队", "全球化营销团队", "销售赋能团队", "L&D部门"],
+      coreValueProp: "无需真人出镜，AI数字人+多语言生成专业视频",
+      pricingModel: "SaaS订阅（按 seats 收费）",
+      marketSegment: "企业级AI视频生成",
+    },
+    features: [
+      { feature: "AI视频生成", competitor: "AI数字人播报，140+数字人", ours: "灵客AI多模型，支持数字人+实拍编辑", advantage: "tie" },
+      { feature: "模板库", competitor: "65+企业模板", ours: "4种视频模板+一键复刻", advantage: "competitor" },
+      { feature: "多语言", competitor: "140+语言", ours: "灵客AI TTS支持50+语言", advantage: "competitor" },
+      { feature: "团队协作", competitor: "基础团队共享", ours: "飞书深度协同，表格数据沉淀", advantage: "ours" },
+      { feature: "数据分析", competitor: "基础观看统计", ours: "飞书表格全链路数据", advantage: "ours" },
+      { feature: "API集成", competitor: "REST API + 嵌入", ours: "飞书SDK + 开放API", advantage: "tie" },
+    ],
+    marketAnalysis: {
+      companySize: "成长期（融资$156M，估值$1B+）",
+      estimatedMarketShare: "企业AI视频市场领先者",
+      growthTrend: "快速增长，2024年ARR约$65M",
+      primaryRegions: ["北美", "欧洲"],
+      competitorType: "间接竞争（企业数字人 vs 短视频营销）",
+    },
+    swot: {
+      strengths: ["品牌知名度高，获客能力强", "AI数字人技术领先", "企业客户资源丰富", "多语言覆盖广"],
+      weaknesses: ["价格偏高，中小企业门槛高", "专注数字人播报，短视频营销能力弱", "缺少中国本地化", "模板偏向企业风格，缺少社交媒体适配"],
+      opportunities: ["切入Synthesia覆盖不到的中小企业市场", "短视频营销赛道是Synthesia盲区", "飞书生态中国企业客户天然优势", "AI短视频+数据闭环是差异化"],
+      threats: ["Synthesia可能扩展短视频能力", "国内同类产品可能快速跟进", "企业客户决策周期长"],
+    },
+    contentStrategy: {
+      primaryPlatforms: ["YouTube", "LinkedIn", "官网博客"],
+      contentTypes: ["产品教程", "客户案例", "行业报告", "Webinar"],
+      avgDuration: "3-8分钟",
+      postingFrequency: "周更（YouTube 200K+订阅）",
+      engagementLevel: "高（企业决策者精准触达）",
+      topPerformingTopics: ["AI数字人教程", "企业培训视频案例", "ROI计算器"],
+    },
+    referencedVideos: [],
+    keyInsights: `1. Synthesia的成功证明了AI视频在企业市场的巨大需求，但其产品定位（企业数字人播报）与我方（短视频营销+团队协同）有明确差异化。
+2. Synthesia的价格门槛（$22/月/人起）为中小企业市场留下了空间，我方可以用更灵活的定价切入。
+3. Synthesia的视频内容策略偏企业正式风格，短视频社交媒体的创意表达是其弱点，这是我方的切入点。
+4. 飞书生态的中国企业客户是Synthesia无法触及的市场，应当优先深耕。`,
+    actionableRecommendations: [
+      "对标Synthesia的AI数字人功能，评估接入数字人模型到平台",
+      "针对中小企业推出更具竞争力的定价（建议¥99/月起）",
+      "重点强化短视频营销场景的模板和AI能力",
+      "利用飞书生态的企业客户，打造团队协作+AI视频的差异化案例",
+      "加强多语言能力，覆盖出海电商客户的视频本地化需求",
+    ],
+    creator: "AI电商分析引擎",
+    createdAt: "2026-05-13T08:30:00Z",
   },
 ];

@@ -1,64 +1,80 @@
-export interface VideoShotBreakdown {
-  timeRange: string;       // e.g. "0-3s"
-  duration: number;        // seconds
-  shotType: string;        // 景别：特写/近景/中景/全景/远景
-  cameraMovement: string;  // 镜头运动：推/拉/摇/移/固定
-  visualDescription: string; // 画面描述
-  characterAction: string; // 人物动作
-  textOverlay: string;     // 字幕/花字
-  audioType: string;       // 配音/背景音乐/音效
-  targetAudience: string;  // 触达人群
-  intent: string;          // 意图（钩子/塑品/信任/引导）
+// ---- E-Commerce Competitive Analysis Model ----
+
+export interface FeatureComparisonItem {
+  feature: string;           // 功能点
+  competitor: string;        // 竞品表现
+  ours: string;             // 我方表现
+  advantage: "competitor" | "ours" | "tie"; // 谁占优
 }
 
-export interface ViralVideo {
-  id: string;
+export interface ProductPositioning {
+  priceRange: string;        // 价格区间
+  targetUsers: string[];     // 目标用户群
+  coreValueProp: string;     // 核心价值主张
+  marketSegment: string;     // 细分市场定位
+  pricingModel: string;      // 定价模式（订阅/买断/按量）
+}
+
+export interface ContentStrategy {
+  primaryPlatforms: string[];    // 主要发布平台
+  contentTypes: string[];        // 内容类型（教程/测评/案例/产品演示）
+  avgDuration: string;           // 平均视频时长
+  postingFrequency: string;      // 发布频率
+  engagementLevel: string;       // 互动水平（高/中/低）
+  topPerformingTopics: string[]; // 表现最好的内容主题
+}
+
+export interface MarketAnalysis {
+  companySize: string;         // 公司规模（初创/成长/成熟/巨头）
+  estimatedMarketShare: string; // 预估市场份额
+  growthTrend: string;          // 增长趋势（上升/平稳/下降）
+  primaryRegions: string[];     // 主要市场区域
+  competitorType: string;       // 竞争类型（直接/间接/替代品）
+}
+
+export interface SWOTItem {
+  strengths: string[];     // 竞品优势
+  weaknesses: string[];    // 竞品劣势
+  opportunities: string[]; // 我方机会
+  threats: string[];       // 对我方威胁
+}
+
+export interface VideoShotBreakdown {
+  timeRange: string;
+  shotType: string;
+  visualDescription: string;
+  intent: string;
+}
+
+export interface ReferencedVideo {
   title: string;
   url: string;
-  platform: string;        // 抖音/快手/TikTok/YouTube
+  platform: string;
   views: number;
   likes: number;
-  comments: number;
-  shares: number;
-  duration: number;        // 视频总时长（秒）
-  publishDate: string;
-  structureType: string;   // 结构类型：痛点钩子型/使用场景型/对比测评型/剧情带入型
-  hookDescription: string; // 开头钩子分析
-  sellingPointDescription: string; // 塑品卖点分析
-  closingDescription: string;      // 下单引导分析
-  shots: VideoShotBreakdown[];     // 分镜拆解
-}
-
-export interface ScriptOptimization {
-  strengthsToLearn: string[];   // 竞品脚本优势（值得学习）
-  weaknessesToImprove: string[]; // 竞品脚本不足（我方优化方向）
-  suggestedScript: string;      // 基于竞品优化的建议脚本
-  keywordSuggestions: string[]; // 建议关键词
+  duration: number; // seconds
+  summary: string;  // what this video demonstrates
 }
 
 export interface CompetitiveResearch {
   id: string;
-  keyword: string;
-  industry: string;
-  competitorLink: string;
   competitorName: string;
-  // 1. 产品卖点和热门关键词分析
-  sellingPointsAnalysis: string;
-  hotKeywords: string[];
-  // 2. 热门爆款视频
-  viralVideos: ViralVideo[];
-  // 3. 视频结构拆解汇总
-  structureSummary: string;
-  // 4. 脚本优化建议
-  scriptOptimization: ScriptOptimization;
-  // 总结
-  conclusion: string;
-  // 兼容旧字段
-  sellingPoints: string;
-  likes: number;
-  views: number;
-  favorites: number;
-  shares: number;
+  competitorLink: string;
+  industry: string;
+  // Product analysis
+  productDescription: string;
+  productPositioning: ProductPositioning;
+  features: FeatureComparisonItem[];
+  // Market analysis
+  marketAnalysis: MarketAnalysis;
+  swot: SWOTItem;
+  // Content strategy
+  contentStrategy: ContentStrategy;
+  referencedVideos: ReferencedVideo[];
+  // AI-generated insights
+  keyInsights: string;          // 核心发现
+  actionableRecommendations: string[]; // 可执行建议
+  // Metadata
   creator: string;
   createdAt: string;
 }
