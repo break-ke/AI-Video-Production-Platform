@@ -1,4 +1,5 @@
 {
+  "/api/competitive-research/analyze/route": "app/api/competitive-research/analyze/route.js",
   "/api/competitive-research/route": "app/api/competitive-research/route.js",
   "/competitive-research/page": "app/competitive-research/page.js",
   "/page": "app/page.js"

@@ -36,40 +36,26 @@ export async function POST(req: NextRequest) {
         // Step 3: Basic info parsed
         send({ step: "basic", label: ANALYSIS_STEPS[2].label, status: "completed", detail: `${analysis.basicInfo?.duration || "N/A"} | ${analysis.basicInfo?.videoType || "N/A"}` });
 
-        // Step 4: Shot breakdown
+        // Step 4: Shot breakdown + video clip extraction
         send({ step: "shots", label: ANALYSIS_STEPS[3].label, status: "completed", detail: `共 ${analysis.shots?.length || 0} 个分镜` });
 
-        // Try to download video and extract clips
         let clipMap: Map<number, string> = new Map();
         let downloadedVideoUrl = videoUrl || null;
+        let videoStatus: string | null = null;
 
-        if (analysis.shots && analysis.shots.length > 0) {
-          send({ step: "shots", label: ANALYSIS_STEPS[3].label, status: "running", detail: "正在从竞品链接下载视频..." });
-
-          // Try to download video from the competitor URL itself
-          if (!downloadedVideoUrl) {
-            try {
-              const { downloadVideoFromUrl } = await import("@/lib/downloader");
-              const localPath = await downloadVideoFromUrl(url, id);
-              if (localPath) {
-                downloadedVideoUrl = localPath;
-                send({ step: "shots", label: ANALYSIS_STEPS[3].label, status: "running", detail: "视频已下载，正在提取分镜片段..." });
-              }
-            } catch { /* continue without */ }
-          }
-
-          // Extract clips from downloaded/uploaded video
-          if (downloadedVideoUrl && downloadedVideoUrl.startsWith("/")) {
-            // Local file path - use directly with ffmpeg
-            const { extractAllClips } = await import("@/lib/video-clips");
-            clipMap = await extractAllClips(downloadedVideoUrl, id, analysis.shots);
-          } else if (downloadedVideoUrl) {
-            const { extractAllClips } = await import("@/lib/video-clips");
-            clipMap = await extractAllClips(downloadedVideoUrl, id, analysis.shots);
-          }
-
-          send({ step: "shots", label: ANALYSIS_STEPS[3].label, status: "completed", detail: `共 ${analysis.shots.length} 分镜, ${clipMap.size} 片段已提取` });
+        // If user uploaded a video, use it for clip extraction
+        if (downloadedVideoUrl && analysis.shots && analysis.shots.length > 0) {
+          send({ step: "shots", label: ANALYSIS_STEPS[3].label, status: "running", detail: "正在从上传视频提取分镜片段..." });
+          const { extractAllClips } = await import("@/lib/video-clips");
+          clipMap = await extractAllClips(downloadedVideoUrl, id, analysis.shots);
+          videoStatus = clipMap.size > 0
+            ? `共 ${clipMap.size}/${analysis.shots.length} 个片段已提取`
+            : "视频片段提取失败，请确认视频文件格式正确";
+        } else {
+          videoStatus = "未上传视频，无法提取分镜片段。请上传竞品视频文件获取完整分析";
         }
+
+        send({ step: "shots", label: ANALYSIS_STEPS[3].label, status: "completed", detail: videoStatus || "" });
 
         // Step 5: Psychology
         send({ step: "psychology", label: ANALYSIS_STEPS[4].label, status: "completed", detail: `${analysis.psychologyWeapons?.length || 0} 种心理学武器` });

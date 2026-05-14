@@ -13,12 +13,13 @@
     "clsx": "^2.1.1",
     "ffmpeg-static": "^5.3.0",
     "lucide-react": "^1.14.0",
+    "nayan-media-downloader": "^0.0.1-security",
     "next": "^16.2.6",
+    "playwright": "^1.60.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "recharts": "^3.8.1",
     "tailwind-merge": "^3.6.0",
-    "tiktok-downloader": "^0.0.4",
     "ytdl-core": "^4.11.5"
   },
   "devDependencies": {

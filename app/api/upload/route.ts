@@ -12,10 +12,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Validate by extension (browsers may send unreliable MIME types)
-    const ext = file.name.split(".").pop()?.toLowerCase() || "";
-    if (!["mp4", "mov", "webm", "avi"].includes(ext)) {
+    const fileExt = file.name.split(".").pop()?.toLowerCase() || "";
+    if (!["mp4", "mov", "webm", "avi"].includes(fileExt)) {
       return NextResponse.json(
-        { success: false, error: `不支持的文件格式: .${ext}，请上传 MP4/MOV/WebM` },
+        { success: false, error: `不支持的文件格式: .${fileExt}，请上传 MP4/MOV/WebM` },
         { status: 400 }
       );
     }

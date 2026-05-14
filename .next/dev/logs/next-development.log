@@ -1,2 +1,32 @@
 {"timestamp":"00:00:02.429","source":"Server","level":"LOG","message":""}
 {"timestamp":"00:00:05.647","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:01:57.063","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:01:58.636","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:01:58.636","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:01:58.670","source":"Server","level":"WARN","message":"[browser] \"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.\""}
+{"timestamp":"00:01:58.670","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:01:58.682","source":"Server","level":"WARN","message":"[browser] \"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.\""}
+{"timestamp":"00:01:58.683","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:02:17.974","source":"Server","level":"LOG","message":"[Gemini] Calling model: \"gemini-3.1-pro-preview\" \"videoUrl:\" \"no\""}
+{"timestamp":"00:03:05.267","source":"Server","level":"LOG","message":"[Gemini] Response length: 3867"}
+{"timestamp":"00:03:19.515","source":"Server","level":"WARN","message":"[browser] \"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.\""}
+{"timestamp":"00:03:19.515","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:03:19.516","source":"Server","level":"WARN","message":"[browser] \"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.\""}
+{"timestamp":"00:03:19.516","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:03:19.516","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:03:19.517","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:04:47.246","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:05:42.402","source":"Server","level":"WARN","message":"[browser] \"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.\""}
+{"timestamp":"00:05:42.402","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:05:42.403","source":"Server","level":"WARN","message":"[browser] \"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.\""}
+{"timestamp":"00:05:42.403","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:05:42.404","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:05:42.404","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:05:51.344","source":"Server","level":"LOG","message":"[Gemini] Calling model: \"gemini-3.1-pro-preview\" \"videoUrl:\" \"no\""}
+{"timestamp":"00:06:36.315","source":"Server","level":"LOG","message":"[Gemini] Response length: 5205"}
+{"timestamp":"00:06:42.157","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:06:42.157","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:06:42.157","source":"Server","level":"WARN","message":"[browser] \"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.\""}
+{"timestamp":"00:06:42.158","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
+{"timestamp":"00:06:42.158","source":"Server","level":"WARN","message":"[browser] \"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.\""}
+{"timestamp":"00:06:42.159","source":"Browser","level":"WARN","message":"Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."}
