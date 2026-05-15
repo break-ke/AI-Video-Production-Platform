@@ -7,10 +7,14 @@ import { mockModelAdaptations } from "@/lib/mock/model-adaptation";
 import { mockEditingTasks } from "@/lib/mock/auto-editing";
 import { mockTemplates } from "@/lib/mock/one-click-replicate";
 
-// ---- Generic helpers ----
+// Use globalThis for shared state across Next.js API route chunks
+const g = globalThis as Record<string, unknown>;
 
-function crud<T extends { id: string }>(initial: T[]) {
-  const items: T[] = [...initial];
+function crud<T extends { id: string }>(key: string, initial: T[]) {
+  if (!g[key]) {
+    g[key] = [...initial];
+  }
+  const items = g[key] as T[];
   return {
     getAll: () => items,
     getById: (id: string) => items.find((i) => i.id === id),
@@ -30,12 +34,10 @@ function crud<T extends { id: string }>(initial: T[]) {
   };
 }
 
-// ---- Stores ----
-
-export const competitiveResearch = crud<CompetitiveResearch>(mockCompetitiveResearch);
-export const storyboards = crud<Storyboard>(mockStoryboards);
-export const feedbacks = crud<Feedback>(mockFeedbacks);
-export const scriptVersions = crud<ScriptVersion>(mockScriptVersions);
-export const modelAdaptations = crud<ModelAdaptation>(mockModelAdaptations);
-export const editingTasks = crud<EditingTask>(mockEditingTasks);
-export const templates = crud<ReplicateTemplate>(mockTemplates);
+export const competitiveResearch = crud<CompetitiveResearch>("__store_cr", mockCompetitiveResearch);
+export const storyboards = crud<Storyboard>("__store_sb", mockStoryboards);
+export const feedbacks = crud<Feedback>("__store_fb", mockFeedbacks);
+export const scriptVersions = crud<ScriptVersion>("__store_sv", mockScriptVersions);
+export const modelAdaptations = crud<ModelAdaptation>("__store_ma", mockModelAdaptations);
+export const editingTasks = crud<EditingTask>("__store_et", mockEditingTasks);
+export const templates = crud<ReplicateTemplate>("__store_tp", mockTemplates);
