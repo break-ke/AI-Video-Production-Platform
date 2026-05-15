@@ -45,11 +45,26 @@ export async function downloadVideoFromUrl(pageUrl: string, taskId: string): Pro
     if (result) return result;
   }
 
-  // For TikTok/Douyin/YouTube: return null (need user to upload video file)
-  // Users can download the video using any free TikTok downloader tool
-  // and upload the MP4 file through our upload button
-  if (/tiktok|douyin|youtube|youtu\.be|instagram/i.test(pageUrl)) {
-    return null; // Tell frontend to prompt for upload
+  // Strategy 2: yt-dlp for all supported platforms
+  try {
+    const { execSync } = await import("child_process");
+    const ytDlpPath = path.join(process.env.HOME || "~", "bin", "yt-dlp.exe");
+    const outPath = path.join(DOWNLOAD_DIR, fileName);
+
+    execSync(
+      `"${ytDlpPath}" -f "best[height<=720][ext=mp4]/best[height<=720]/best[ext=mp4]/best" -o "${outPath}" "${pageUrl}" --max-filesize 100M --no-playlist --socket-timeout 30`,
+      { timeout: 120000, stdio: "pipe" }
+    );
+
+    // Check if file was created
+    const { stat } = await import("fs/promises");
+    const info = await stat(outPath);
+    if (info.size > 10240) {
+      console.log(`[Downloader] yt-dlp downloaded ${(info.size / 1024 / 1024).toFixed(1)}MB`);
+      return `/clips/${fileName}`;
+    }
+  } catch (e) {
+    console.log("[Downloader] yt-dlp failed:", (e as Error).message?.substring(0, 100));
   }
 
   return null;

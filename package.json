@@ -20,6 +20,7 @@
     "react-dom": "^19.2.6",
     "recharts": "^3.8.1",
     "tailwind-merge": "^3.6.0",
+    "yt-dlp-wrap": "^2.3.12",
     "ytdl-core": "^4.11.5"
   },
   "devDependencies": {

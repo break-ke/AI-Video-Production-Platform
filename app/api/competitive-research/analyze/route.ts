@@ -38,26 +38,40 @@ export async function POST(req: NextRequest) {
         // Step 3: Basic info parsed
         send({ step: "basic", label: ANALYSIS_STEPS[2].label, status: "completed", detail: `${analysis.basicInfo?.duration || "N/A"} | ${analysis.basicInfo?.videoType || "N/A"}` });
 
-        // Step 4: Shot breakdown + video clip extraction
+        // Step 4: Shot breakdown + video download + clip extraction
         send({ step: "shots", label: ANALYSIS_STEPS[3].label, status: "completed", detail: `共 ${analysis.shots?.length || 0} 个分镜` });
 
         let clipMap: Map<number, string> = new Map();
         let downloadedVideoUrl = videoUrl || null;
-        let videoStatus: string | null = null;
+        let videoStatus = "";
 
-        // If user uploaded a video, use it for clip extraction
-        if (downloadedVideoUrl && analysis.shots && analysis.shots.length > 0) {
-          send({ step: "shots", label: ANALYSIS_STEPS[3].label, status: "running", detail: "正在从上传视频提取分镜片段..." });
-          const { extractAllClips } = await import("@/lib/video-clips");
-          clipMap = await extractAllClips(downloadedVideoUrl, id, analysis.shots);
-          videoStatus = clipMap.size > 0
-            ? `共 ${clipMap.size}/${analysis.shots.length} 个片段已提取`
-            : "视频片段提取失败，请确认视频文件格式正确";
-        } else {
-          videoStatus = "未上传视频，无法提取分镜片段。请上传竞品视频文件获取完整分析";
+        if (analysis.shots && analysis.shots.length > 0) {
+          // Try yt-dlp download if no uploaded video
+          if (!downloadedVideoUrl && !isVideoOnly) {
+            send({ step: "shots", label: ANALYSIS_STEPS[3].label, status: "running", detail: "yt-dlp 正在下载竞品视频..." });
+            try {
+              const { downloadVideoFromUrl } = await import("@/lib/downloader");
+              const result = await downloadVideoFromUrl(targetUrl, id);
+              if (result) {
+                downloadedVideoUrl = result;
+                send({ step: "shots", label: ANALYSIS_STEPS[3].label, status: "running", detail: "视频已下载，正在提取分镜片段..." });
+              }
+            } catch { /* continue */ }
+          }
+
+          // Extract clips from downloaded/uploaded video
+          if (downloadedVideoUrl) {
+            const { extractAllClips } = await import("@/lib/video-clips");
+            clipMap = await extractAllClips(downloadedVideoUrl, id, analysis.shots);
+            videoStatus = clipMap.size > 0
+              ? `共 ${clipMap.size}/${analysis.shots.length} 片段已提取`
+              : "提取失败，请确认视频格式";
+          } else {
+            videoStatus = "未获取到视频（网络限制或平台不支持）";
+          }
         }
 
-        send({ step: "shots", label: ANALYSIS_STEPS[3].label, status: "completed", detail: videoStatus || "" });
+        send({ step: "shots", label: ANALYSIS_STEPS[3].label, status: "completed", detail: videoStatus || "无分镜数据" });
 
         // Step 5: Psychology
         send({ step: "psychology", label: ANALYSIS_STEPS[4].label, status: "completed", detail: `${analysis.psychologyWeapons?.length || 0} 种心理学武器` });
