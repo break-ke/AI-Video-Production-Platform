@@ -16,13 +16,10 @@ import {
 } from "lucide-react";
 
 const ANALYSIS_STEPS = [
+  { key: "download", label: "下载竞品视频", icon: Film, desc: "yt-dlp 从链接下载视频文件" },
   { key: "scrape", label: "抓取网页内容", icon: Globe, desc: "获取页面标题、描述、正文" },
-  { key: "ai", label: "调用Gemini多模态分析", icon: Brain, desc: "TikTok广告导演视角分析" },
-  { key: "basic", label: "解析视频基础信息", icon: Film, desc: "时长、类型、钩子、CTA" },
-  { key: "shots", label: "逐镜头分镜拆解", icon: Camera, desc: "15列精细化分镜表" },
-  { key: "psychology", label: "消费心理学分析", icon: Brain, desc: "16种心理学武器+决策路径" },
-  { key: "rhythm", label: "生成节奏曲线", icon: Activity, desc: "视觉/情绪/信息密度曲线" },
-  { key: "insights", label: "总结与复刻建议", icon: Lightbulb, desc: "核心发现+可执行方案" },
+  { key: "ai", label: "Gemini AI 实时分析", icon: Brain, desc: "分析视频内容+生成分镜+心理学" },
+  { key: "clips", label: "提取分镜视频片段", icon: Camera, desc: "ffmpeg 按时间码切取片段" },
 ];
 
 export default function CompetitiveResearchPage() {
