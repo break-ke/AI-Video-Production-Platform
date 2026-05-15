@@ -48,23 +48,31 @@ export async function downloadVideoFromUrl(pageUrl: string, taskId: string): Pro
   // Strategy 2: yt-dlp for all supported platforms
   try {
     const { execSync } = await import("child_process");
-    const ytDlpPath = path.join(process.env.HOME || "~", "bin", "yt-dlp.exe");
+    // Use known absolute paths
+    const ytDlpPath = "C:\\Users\\Administrator\\bin\\yt-dlp.exe";
     const outPath = path.join(DOWNLOAD_DIR, fileName);
 
-    execSync(
+    console.log(`[Downloader] Running: ${ytDlpPath} -o ${outPath} ${pageUrl}`);
+    const result = execSync(
       `"${ytDlpPath}" -f "best[height<=720][ext=mp4]/best[height<=720]/best[ext=mp4]/best" -o "${outPath}" "${pageUrl}" --max-filesize 100M --no-playlist --socket-timeout 30`,
-      { timeout: 120000, stdio: "pipe" }
+      { timeout: 120000, stdio: "pipe", encoding: "utf-8" }
     );
+
+    console.log(`[Downloader] yt-dlp output: ${result.substring(result.length - 200)}`);
 
     // Check if file was created
     const { stat } = await import("fs/promises");
-    const info = await stat(outPath);
-    if (info.size > 10240) {
-      console.log(`[Downloader] yt-dlp downloaded ${(info.size / 1024 / 1024).toFixed(1)}MB`);
-      return `/clips/${fileName}`;
+    try {
+      const info = await stat(outPath);
+      if (info.size > 10240) {
+        console.log(`[Downloader] yt-dlp downloaded ${(info.size / 1024 / 1024).toFixed(1)}MB`);
+        return `/clips/${fileName}`;
+      }
+    } catch {
+      console.log(`[Downloader] File not found at: ${outPath}`);
     }
   } catch (e) {
-    console.log("[Downloader] yt-dlp failed:", (e as Error).message?.substring(0, 100));
+    console.log("[Downloader] yt-dlp failed:", (e as Error).message?.substring(0, 200));
   }
 
   return null;
