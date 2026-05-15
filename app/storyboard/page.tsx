@@ -66,38 +66,59 @@ export default function StoryboardPage() {
     setProgressVisible(true);
     setProgressStep(0);
 
-    // Progress animation matching actual steps
-    let step = 0;
-    const timer = setInterval(() => {
-      step++;
-      setProgressStep(Math.min(step, GEN_STEPS.length));
-      if (step >= GEN_STEPS.length) clearInterval(timer);
-    }, 1500);
-
     try {
       const body: Record<string, string> = { prompt };
-      if (refUrl) {
-        setProgressStep(1); // upload complete
-        body.referenceImageUrl = refUrl;
-      }
-      const r = await fetch("/api/storyboard", {
-        method: "POST", headers: { "Content-Type": "application/json" },
+      if (refUrl) body.referenceImageUrl = refUrl;
+
+      // SSE stream for real progress
+      const res = await fetch("/api/storyboard/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const j = await r.json();
-      clearInterval(timer);
-      setProgressStep(GEN_STEPS.length);
-      if (j.success) {
-        setTimeout(() => {
-          setData(d => [j.data, ...d]);
-          setShowAdd(false); setPrompt(""); setRefUrl(""); setRefFile(null);
-          setProgressVisible(false); setProgressStep(0);
-        }, 500);
+
+      if (!res.ok) { setProgressVisible(false); return; }
+
+      const reader = res.body?.getReader();
+      if (!reader) { setProgressVisible(false); return; }
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          try {
+            const evt = JSON.parse(line.slice(6));
+            if (evt.step === "done") {
+              const result = JSON.parse(evt.detail);
+              if (result.success) {
+                setData(d => [result.data, ...d]);
+                setProgressStep(GEN_STEPS.length);
+                setSelected(result.data);
+                setTimeout(() => {
+                  setShowAdd(false); setPrompt(""); setRefUrl(""); setRefFile(null);
+                  setProgressVisible(false); setProgressStep(0);
+                  setShowDetail(true); // Auto-open detail after generation
+                }, 600);
+              }
+            } else if (evt.step === "error") {
+              setProgressVisible(false);
+            } else {
+              const idx = GEN_STEPS.findIndex(s => s.key === evt.step);
+              if (idx >= 0 && evt.status === "completed") setProgressStep(Math.max(progressStep, idx + 1));
+            }
+          } catch { /* skip */ }
+        }
       }
-    } catch {
-      clearInterval(timer);
-      setProgressVisible(false);
-    }
+    } catch { setProgressVisible(false); }
     finally { setGenerating(false); }
   };
 
@@ -108,34 +129,51 @@ export default function StoryboardPage() {
     setProgressVisible(true);
     setProgressStep(0);
 
-    let step = 0;
-    const timer = setInterval(() => {
-      step++;
-      setProgressStep(Math.min(step, GEN_STEPS.length));
-      if (step >= GEN_STEPS.length) clearInterval(timer);
-    }, 1500);
-
     try {
       const body: Record<string, string> = { prompt: rejectTarget.prompt || rejectTarget.imageDescription };
-      const r = await fetch("/api/storyboard", {
-        method: "POST", headers: { "Content-Type": "application/json" },
+      const res = await fetch("/api/storyboard/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const j = await r.json();
-      clearInterval(timer);
-      setProgressStep(GEN_STEPS.length);
-      if (j.success) {
-        setTimeout(() => {
-          // Replace the rejected item with new generated one
-          setData(d => [j.data, ...d.filter(s => s.id !== rejectTarget.id)]);
-          setShowReject(false); setRejectTarget(null);
-          setProgressVisible(false); setProgressStep(0);
-        }, 500);
+      if (!res.ok) { setProgressVisible(false); return; }
+
+      const reader = res.body?.getReader();
+      if (!reader) { setProgressVisible(false); return; }
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n\n");
+        buffer = lines.pop() || "";
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          try {
+            const evt = JSON.parse(line.slice(6));
+            if (evt.step === "done") {
+              const result = JSON.parse(evt.detail);
+              if (result.success) {
+                setData(d => [result.data, ...d.filter(s => s.id !== rejectTarget.id)]);
+                setProgressStep(GEN_STEPS.length);
+                setSelected(result.data);
+                setTimeout(() => {
+                  setShowReject(false); setRejectTarget(null);
+                  setProgressVisible(false); setProgressStep(0);
+                  setShowDetail(true);
+                }, 600);
+              }
+            } else {
+              const idx = GEN_STEPS.findIndex(s => s.key === evt.step);
+              if (idx >= 0 && evt.status === "completed") setProgressStep(Math.max(progressStep, idx + 1));
+            }
+          } catch { /* skip */ }
+        }
       }
-    } catch {
-      clearInterval(timer);
-      setProgressVisible(false);
-    }
+    } catch { setProgressVisible(false); }
     finally { setRegenerating(false); }
   };
 
