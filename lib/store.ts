@@ -7,13 +7,10 @@ import { mockModelAdaptations } from "@/lib/mock/model-adaptation";
 import { mockEditingTasks } from "@/lib/mock/auto-editing";
 import { mockTemplates } from "@/lib/mock/one-click-replicate";
 
-// Use globalThis for shared state across Next.js API route chunks
 const g = globalThis as Record<string, unknown>;
 
 function crud<T extends { id: string }>(key: string, initial: T[]) {
-  if (!g[key]) {
-    g[key] = [...initial];
-  }
+  if (!g[key]) g[key] = [...initial];
   const items = g[key] as T[];
   return {
     getAll: () => items,
