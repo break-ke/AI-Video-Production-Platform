@@ -61,7 +61,8 @@
       "Bash(node -e \"const yt = require\\('yt-dlp-wrap'\\); console.log\\('Binary path:', yt.default?.path || yt.path || 'not found'\\)\")",
       "Bash(node_modules/ffmpeg-static/ffmpeg.exe -y -ss 5 -i \"D:/claude/CompetitiveProductAnalysisSystem/public/clips/test_yt.mp4\" -t 3 -c:v libx264 -preset ultrafast -crf 28 -an \"D:/claude/CompetitiveProductAnalysisSystem/public/clips/test_clip.mp4\")",
       "Bash(node -e \"console.log\\('HOME:', process.env.HOME\\); console.log\\('cwd:', process.cwd\\(\\)\\)\")",
-      "Bash(LINGKE_API_KEY=sk-e22d0bbdd35dc662c97a44a6dd49467eb8e9c5a4940b53c4 LINGKE_BASE_URL=https://api.ai6800.com/api npx tsx -e ' *)"
+      "Bash(LINGKE_API_KEY=sk-e22d0bbdd35dc662c97a44a6dd49467eb8e9c5a4940b53c4 LINGKE_BASE_URL=https://api.ai6800.com/api npx tsx -e ' *)",
+      "Bash(read TOKEN)"
     ]
   }
 }

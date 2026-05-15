@@ -96,6 +96,19 @@ export async function POST(req: NextRequest) {
         };
         competitiveResearch.add({ ...analysis, id });
 
+        // Async sync to Feishu (don't block response)
+        const { syncToFeishu } = await import("@/lib/feishu-sync");
+        syncToFeishu("竞品调研表", {
+          "ID": id,
+          "竞品名称": analysis.competitorName,
+          "行业": analysis.industry,
+          "视频类型": analysis.basicInfo?.videoType || "",
+          "钩子类型": analysis.basicInfo?.hookType || "",
+          "链接": targetUrl,
+          "摘要": analysis.summary?.substring(0, 200) || "",
+          "创建时间": new Date().toISOString(),
+        }).catch(() => {});
+
         send({ step: "done", label: "完成", status: "completed", detail: JSON.stringify({ success: true, data: result }) });
       } catch (e) {
         send({ step: "error", label: "错误", status: "error", detail: (e as Error).message });
